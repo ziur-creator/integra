@@ -270,15 +270,15 @@ input[type=file]{display:none}
   </div>
   <div class="auth-card">
     <div class="auth-tabs">
-      <button type="button" class="auth-tab active" id="tab-login" onclick="switchAuth('login')">Ingresar</button>
-      <button type="button" class="auth-tab" id="tab-reg" onclick="switchAuth('register')">Registrarse</button>
+      <button type="button" class="auth-tab active" id="tab-login" onclick="_switchAuth('login')">Ingresar</button>
+      <button type="button" class="auth-tab" id="tab-reg" onclick="_switchAuth('register')">Registrarse</button>
     </div>
     <!-- LOGIN -->
     <div id="form-login">
-      <div class="field"><label>Email</label><input type="email" id="l-email" placeholder="tu@email.com" autocomplete="email"></div>
-      <div class="field"><label>Contraseña</label><input type="password" id="l-pw" placeholder="••••••••" autocomplete="current-password"></div>
+      <div class="field"><label>Email</label><input type="email" id="l-email" placeholder="tu@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')_login()"></div>
+      <div class="field"><label>Contraseña</label><input type="password" id="l-pw" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')_login()"></div>
       <div id="l-msg"></div>
-      <button type="button" class="auth-btn" id="btn-login">Ingresar</button>
+      <button type="button" class="auth-btn" id="btn-login" onclick="_login()">Ingresar</button>
     </div>
     <!-- REGISTER -->
     <div id="form-reg" style="display:none">
@@ -290,12 +290,12 @@ input[type=file]{display:none}
         <input type="file" id="reg-photo-input" accept="image/*">
         <span class="photo-lbl">Foto de perfil (opcional)</span>
       </div>
-      <div class="field"><label>Nombre completo *</label><input type="text" id="r-name" placeholder="Dr. Juan Pérez" autocomplete="name"></div>
-      <div class="field"><label>Email *</label><input type="email" id="r-email" placeholder="tu@email.com" autocomplete="email"></div>
-      <div class="field"><label>Teléfono</label><input type="tel" id="r-phone" placeholder="+54 9 11 1234-5678" autocomplete="tel"></div>
-      <div class="field"><label>Contraseña *</label><input type="password" id="r-pw" placeholder="Min. 6 caracteres" autocomplete="new-password"></div>
+      <div class="field"><label>Nombre completo *</label><input type="text" id="r-name" placeholder="Dr. Juan Pérez" autocomplete="name" onkeydown="if(event.key==='Enter')_register()"></div>
+      <div class="field"><label>Email *</label><input type="email" id="r-email" placeholder="tu@email.com" autocomplete="email" onkeydown="if(event.key==='Enter')_register()"></div>
+      <div class="field"><label>Teléfono</label><input type="tel" id="r-phone" placeholder="+54 9 11 1234-5678" autocomplete="tel" onkeydown="if(event.key==='Enter')_register()"></div>
+      <div class="field"><label>Contraseña *</label><input type="password" id="r-pw" placeholder="Min. 6 caracteres" autocomplete="new-password" onkeydown="if(event.key==='Enter')_register()"></div>
       <div id="r-msg"></div>
-      <button type="button" class="auth-btn" id="btn-register">Crear cuenta</button>
+      <button type="button" class="auth-btn" id="btn-register" onclick="_register()">Crear cuenta</button>
     </div>
   </div>
 </div>
@@ -450,11 +450,26 @@ input[type=file]{display:none}
 <div class="toast" id="toast" style="display:none"></div>
 
 <script>
+// Global bridge functions - wait for app to be ready
+function _login(){
+  if(typeof doLogin==='function'){ doLogin(); return; }
+  // App not ready yet, wait and retry
+  setTimeout(function(){ if(typeof doLogin==='function') doLogin(); }, 300);
+}
+function _register(){
+  if(typeof doRegister==='function'){ doRegister(); return; }
+  setTimeout(function(){ if(typeof doRegister==='function') doRegister(); }, 300);
+}
+function _switchAuth(t){
+  if(typeof switchAuth==='function'){ switchAuth(t); return; }
+  setTimeout(function(){ if(typeof switchAuth==='function') switchAuth(t); }, 300);
+}
+</script>
+
+<script>
 // ================================================================
 //  INTEGRA MÁS — todo el JS corre dentro de DOMContentLoaded
 // ================================================================
-document.addEventListener('DOMContentLoaded', function() {
-
 // === CONFIG (reemplazar cuando tengas Google Apps Script) ===
 var API_URL = 'https://script.google.com/macros/s/AKfycbz2wDqw6TN6G40mumNEfiHHPRRCqB0bUt4JfalGVdogQbl558P3yAWaMwNOPEjrkoIx/exec';
 // ===========================================================
@@ -1084,6 +1099,7 @@ function saveEditConsul(){
   });
 }
 
+window.onload = function() {
 // ================================================================
 //  WIRE UP — conectar todos los event listeners estáticos
 // ================================================================
@@ -1136,14 +1152,10 @@ G('modalEditConsul').addEventListener('click',     function(e){if(e.target===thi
 window.addEventListener('online',  function(){G('offlineBar').style.display='none';});
 window.addEventListener('offline', function(){G('offlineBar').style.display='block';});
 
-// Unregister old broken service workers, then register fresh
+// Unregister ALL service workers to prevent stale cache
 if('serviceWorker' in navigator){
   navigator.serviceWorker.getRegistrations().then(function(regs){
     regs.forEach(function(r){ r.unregister(); });
-  }).then(function(){
-    navigator.serviceWorker.register('./sw.js').catch(function(){});
-  }).catch(function(){
-    navigator.serviceWorker.register('./sw.js').catch(function(){});
   });
 }
 
@@ -1157,8 +1169,6 @@ if('serviceWorker' in navigator){
   }catch(e){}
 })();
 
-}); // end DOMContentLoaded
-</script>
+}; // end window.onload
 
-</body>
-</html>
+</script>
