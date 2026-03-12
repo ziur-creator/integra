@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Integra Más">
+<meta name="theme-color" content="#c25a00">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Integra Más</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#fdf6f0;
+  --surface:#fffaf6;
+  --surface2:#f5ece3;
+  --ink:#1a1410;
+  --ink2:#6b5a50;
+  --ink3:#a08878;
+  --accent:#c25a00;
+  --accent2:#e07830;
+  --accent-light:#fdebd4;
+  --danger:#c0392b;
+  --danger-light:#fdecea;
+  --border:#e8d8cc;
+  --shadow:0 2px 16px rgba(80,40,10,0.10);
+  --radius:16px;
+  --nav-h:64px;
+  --header-h:56px;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;overscroll-behavior:none}
+input,select,button,textarea,a{font-family:'DM Sans',sans-serif}
+
+/* APP SHELL */
+#app{display:flex;flex-direction:column;height:100%;height:100dvh}
+.top-bar{background:var(–accent);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;height:calc(var(–header-h) + var(–safe-top));padding-top:var(–safe-top);flex-shrink:0;z-index:50;box-shadow:0 2px 12px rgba(0,0,0,0.2)}
+.logo{display:flex;align-items:center;gap:9px;font-family:‘DM Serif Display’,serif;font-size:20px}
+.logo span{color:#fdb57a;font-style:italic}
+.logo-ico{width:28px;height:28px;flex-shrink:0}
+.user-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:30px;padding:4px 12px 4px 4px;cursor:pointer}
+.chip-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;background-size:cover;background-position:center;overflow:hidden}
+.uname{font-size:12px;font-weight:500;color:#fff}
+.page-content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;background:var(–bg);padding-bottom:calc(var(–nav-h) + var(–safe-bottom) + 16px)}
+.page{display:none}
+.page.active{display:block;animation:fadeUp 0.2s ease}
+.inner{padding:16px;max-width:600px;margin:0 auto}
+.bottom-nav{background:var(–surface);border-top:1px solid var(–border);display:flex;align-items:stretch;height:calc(var(–nav-h) + var(–safe-bottom));padding-bottom:var(–safe-bottom);flex-shrink:0;z-index:50;box-shadow:0 -2px 12px rgba(0,0,0,0.07)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;border:none;background:none;color:var(–ink3);padding-top:6px;transition:color 0.15s}
+.nav-item.active{color:var(–accent)}
+.nav-ico{font-size:21px;line-height:1}
+.nav-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px}
+
+/* AUTH */
+#auth-screen{position:fixed;inset:0;background:var(–accent);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow-y:auto}
+.auth-brand{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:24px}
+.auth-logo-ico{width:64px;height:64px}
+.auth-logo{font-family:‘DM Serif Display’,serif;font-size:34px;color:#fff;text-align:center}
+.auth-logo span{color:#fdb57a;font-style:italic}
+.auth-sub{color:rgba(255,255,255,0.65);font-size:13px}
+.auth-card{background:var(–surface);border-radius:20px;padding:24px;width:100%;max-width:380px;box-shadow:0 24px 60px rgba(0,0,0,0.25)}
+.auth-tabs{display:flex;background:var(–surface2);border-radius:10px;padding:3px;margin-bottom:20px}
+.auth-tab{flex:1;padding:8px;text-align:center;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:var(–ink2);transition:all 0.15s;border:none;background:none}
+.auth-tab.active{background:var(–surface);color:var(–accent);box-shadow:0 1px 4px rgba(0,0,0,0.1)}
+.photo-picker{display:flex;flex-direction:column;align-items:center;margin-bottom:16px}
+.photo-circle{width:80px;height:80px;border-radius:50%;background:var(–surface2);border:3px dashed var(–border);display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;position:relative;background-size:cover;background-position:center}
+.photo-ico{font-size:28px;color:var(–ink3)}
+.photo-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.45);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.2s;font-size:18px}
+.photo-circle:hover .photo-overlay{opacity:1}
+.photo-lbl{font-size:11px;color:var(–ink3);margin-top:6px}
+input[type=file]{display:none}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:11px;font-weight:700;color:var(–ink2);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.3px}
+.field input,.field select{width:100%;padding:11px 13px;border:2px solid var(–border);border-radius:10px;font-size:15px;color:var(–ink);background:var(–surface);outline:none;transition:border 0.15s}
+.field input:focus,.field select:focus{border-color:var(–accent2)}
+.auth-btn{width:100%;padding:13px;background:var(–accent);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px}
+.auth-btn:active{opacity:0.85}
+.msg{font-size:12px;text-align:center;margin-top:10px;padding:9px;border-radius:8px}
+.msg.err{background:var(–danger-light);color:var(–danger)}
+.msg.ok{background:var(–accent-light);color:var(–accent)}
+
+/* CARDS */
+.card{background:var(–surface);border-radius:var(–radius);box-shadow:var(–shadow);overflow:hidden;margin-bottom:14px}
+.ch{padding:14px 18px 12px;border-bottom:1px solid var(–border);display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.ch h3{font-family:‘DM Serif Display’,serif;font-size:16px}
+.ch p{font-size:12px;color:var(–ink3);margin-top:2px}
+.cb{padding:16px 18px}
+
+/* STEPPER */
+.stepper{display:flex;align-items:center;background:var(–surface);border-radius:var(–radius);box-shadow:var(–shadow);padding:14px 16px;margin-bottom:14px}
+.step{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+.snum{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0;border:2px solid var(–border);color:var(–ink3);background:var(–surface2);transition:all 0.25s}
+.step.done .snum,.step.active .snum{background:var(–accent);border-color:var(–accent);color:#fff}
+.step.active .snum{box-shadow:0 0 0 3px var(–accent-light)}
+.sinfo{flex:1;min-width:0}
+.slbl{font-size:9px;color:var(–ink3);font-weight:700;text-transform:uppercase;letter-spacing:0.5px}
+.sval{font-size:12px;font-weight:600;color:var(–ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.step.pending .sval{color:var(–ink3);font-weight:400}
+.sarrow{color:var(–border);font-size:16px;margin:0 3px;flex-shrink:0}
+
+/* CALENDAR */
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cnb{background:var(–surface2);border:none;border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+.cnb:active{background:var(–border)}
+.cmth{font-family:‘DM Serif Display’,serif;font-size:15px}
+.cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cdow{text-align:center;font-size:9px;font-weight:700;color:var(–ink3);padding:3px 0;text-transform:uppercase}
+.cday{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:8px;font-size:13px;border:2px solid transparent;font-weight:500;position:relative}
+.cday.pick{cursor:pointer}
+.cday.pick:active{transform:scale(0.88)}
+.cday.today{border-color:var(–accent2);color:var(–accent)}
+.cday.sel{background:var(–accent);color:#fff}
+.cday.past{color:var(–border)}
+.cday.hres:after{content:’’;position:absolute;bottom:2px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(–accent2)}
+.cday.sel.hres:after{background:rgba(255,255,255,0.6)}
+
+/* PILLS */
+.slbl2{font-size:11px;font-weight:700;color:var(–ink2);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.4px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.pill{padding:8px 13px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;border:2px solid var(–border);background:var(–surface);color:var(–ink2)}
+.pill:active{transform:scale(0.93)}
+.pill.sel{background:var(–accent);border-color:var(–accent);color:#fff}
+.tprev{background:var(–accent-light);border:1px solid var(–accent2);border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(–accent);margin-bottom:12px}
+.tprev-chg{margin-left:auto;padding:4px 9px;border-radius:7px;border:1px solid var(–accent2);background:#fff;color:var(–accent);font-size:11px;cursor:pointer;font-weight:600}
+
+/* CONSULTORIOS */
+.consul-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cc{border:2px solid var(–border);border-radius:10px;padding:12px 10px;text-align:center;background:var(–surface);position:relative;transition:all 0.15s}
+.cc.pick{cursor:pointer}
+.cc.pick:active{transform:scale(0.96)}
+.cc.sel{border-color:var(–accent);background:var(–accent-light)}
+.cc.occ{background:#fdf5f5;opacity:0.75}
+.cc-img{width:100%;height:68px;border-radius:6px;margin-bottom:7px;background:var(–surface2);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden}
+.cc-img img{width:100%;height:100%;object-fit:cover}
+.cdot{width:10px;height:10px;border-radius:50%;margin:auto}
+.cname{font-weight:600;font-size:13px;margin-bottom:3px}
+.cstat{font-size:11px}
+.cstat.free{color:var(–accent2)}
+.cstat.busy{color:var(–danger)}
+.cwho{font-size:10px;color:var(–ink3);margin-top:2px}
+.cbadge{position:absolute;top:4px;right:4px;font-size:9px;font-weight:700;padding:2px 5px;border-radius:8px}
+.cbadge.free{background:var(–accent-light);color:var(–accent)}
+.cbadge.busy{background:var(–danger-light);color:var(–danger)}
+.confirm-bar{background:var(–accent);color:#fff;border-radius:var(–radius);padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 6px 24px rgba(194,90,0,0.35);flex-wrap:wrap;margin-top:14px}
+.confirm-title{font-family:‘DM Serif Display’,serif;font-size:16px;margin-bottom:2px}
+.confirm-sub{font-size:12px;opacity:0.8}
+
+/* BUTTONS */
+.btn{padding:9px 16px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;border:none;display:inline-flex;align-items:center;gap:5px;transition:all 0.12s;text-decoration:none}
+.btn:active{transform:scale(0.96)}
+.btn-primary{background:var(–accent);color:#fff}
+.btn-ghost{background:var(–surface2);color:var(–ink)}
+.btn-ghost:hover{background:var(–border)}
+.btn-white{background:#fff;color:var(–accent);font-weight:700}
+.btn-ow{background:rgba(255,255,255,0.18);color:#fff;border:1px solid rgba(255,255,255,0.3)}
+.btn-danger{background:var(–danger-light);color:var(–danger)}
+.btn-call{background:#fff3e0;color:#b84a00}
+.btn-mail{background:#fff8f0;color:var(–accent)}
+.btn-sm{padding:6px 11px;font-size:12px}
+.btn-full{width:100%;justify-content:center;padding:12px}
+
+/* MIS RESERVAS */
+.res-card{background:var(–surface);border-radius:var(–radius);box-shadow:var(–shadow);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-left:4px solid;margin-bottom:10px}
+.res-title{font-weight:600;font-size:14px;margin-bottom:3px}
+.res-meta{font-size:12px;color:var(–ink2);display:flex;flex-wrap:wrap;gap:7px}
+
+/* AGENDA */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.stat-card{background:var(–surface);border-radius:var(–radius);padding:14px 16px;box-shadow:var(–shadow)}
+.stat-v{font-size:26px;font-family:‘DM Serif Display’,serif}
+.stat-l{font-size:11px;color:var(–ink3)}
+.filter-row{display:flex;gap:8px;padding:12px 14px;border-bottom:1px solid var(–border);flex-wrap:wrap}
+.fsel{padding:7px 10px;border:1px solid var(–border);border-radius:8px;background:var(–surface);font-size:12px;color:var(–ink);outline:none;flex:1;min-width:100px}
+.agenda-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.atable{width:100%;border-collapse:collapse;min-width:500px}
+.atable th{background:var(–surface2);padding:9px 12px;font-size:10px;font-weight:700;color:var(–ink2);text-align:left;border-bottom:2px solid var(–border);text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap}
+.atable td{padding:9px 12px;border-bottom:1px solid var(–border);font-size:13px;vertical-align:middle}
+.atable tr:last-child td{border-bottom:none}
+.atable tr:hover td{background:var(–surface2)}
+.badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:14px;font-size:10px;font-weight:700}
+.bg{background:var(–accent-light);color:var(–accent)}
+.bme{background:var(–surface2);color:var(–ink2)}
+
+/* DIRECTORIO */
+.udc{background:var(–surface);border-radius:var(–radius);box-shadow:var(–shadow);overflow:hidden;margin-bottom:12px}
+.udc-top{display:flex;align-items:center;gap:14px;padding:16px}
+.udc-info{flex:1;min-width:0}
+.udc-name{font-weight:600;font-size:15px}
+.udc-email{font-size:12px;color:var(–ink2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.udc-actions{display:flex;gap:8px;padding:0 16px 14px;flex-wrap:wrap}
+.rol-badge{display:inline-flex;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+.rol-admin{background:#fef3cd;color:#856404}
+.rol-user{background:var(–surface2);color:var(–ink2)}
+
+/* ADMIN */
+.admin-card{background:var(–surface);border-radius:var(–radius);box-shadow:var(–shadow);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.admin-info{flex:1;min-width:0}
+.admin-name{font-weight:600;font-size:14px}
+.admin-meta{font-size:12px;color:var(–ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.admin-actions{display:flex;gap:6px;flex-shrink:0}
+.cac{background:var(–surface);border-radius:var(–radius);box-shadow:var(–shadow);overflow:hidden;margin-bottom:12px}
+.cac-img{width:100%;height:100px;background:var(–surface2);display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden}
+.cac-img img{width:100%;height:100%;object-fit:cover}
+.cac-body{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.cac-name{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+.cac-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* PERFIL */
+.profile-hero{background:var(–accent);padding:28px 20px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;margin:-16px -16px 16px}
+.profile-av{width:88px;height:88px;border-radius:50%;border:3px solid rgba(255,255,255,0.4);display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#fff;overflow:hidden;background-color:var(–accent2);cursor:pointer;position:relative;background-size:cover;background-position:center}
+.profile-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.profile-av-badge{position:absolute;bottom:2px;right:2px;background:var(–surface);border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 1px 4px rgba(0,0,0,0.2)}
+.profile-name{color:#fff;font-family:‘DM Serif Display’,serif;font-size:20px}
+.profile-email{color:rgba(255,255,255,0.7);font-size:13px}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:150;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px);animation:fadeIn 0.2s}
+.modal-sheet{background:var(–surface);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:500px;padding-bottom:calc(20px + var(–safe-bottom));max-height:92vh;overflow-y:auto;animation:slideSheet 0.25s}
+.modal-handle{width:36px;height:4px;background:var(–border);border-radius:2px;margin:0 auto 18px}
+.modal-title{font-family:‘DM Serif Display’,serif;font-size:18px;margin-bottom:16px}
+.sec-title{font-family:‘DM Serif Display’,serif;font-size:16px;margin-bottom:12px}
+.divider{height:1px;background:var(–border);margin:14px 0}
+
+/* UTILS */
+.loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px}
+.spinner{width:34px;height:34px;border:3px solid var(–border);border-top-color:var(–accent);border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:10px}
+.loader p{font-size:13px;color:var(–ink3)}
+.empty{text-align:center;padding:48px 20px;color:var(–ink3)}
+.empty .ei{font-size:36px;margin-bottom:10px}
+.empty h3{font-size:15px;color:var(–ink2);margin-bottom:5px}
+.empty p{font-size:13px}
+.offline-bar{background:var(–danger);color:#fff;text-align:center;padding:5px;font-size:12px;font-weight:600;display:none}
+.toast{position:fixed;bottom:calc(var(–nav-h) + var(–safe-bottom) + 10px);left:50%;transform:translateX(-50%);color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:500;box-shadow:0 4px 20px rgba(0,0,0,0.25);z-index:300;white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+.toast.ok{background:var(–accent)}
+.toast.err{background:var(–danger)}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeUp{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes slideSheet{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+
+</head>
+<body>
+
+<div class="offline-bar" id="offlineBar">Sin conexion</div>
+
+<!-- AUTH -->
+
+<div id="auth-screen">
+  <div class="auth-brand">
+    <svg class="auth-logo-ico" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="8" y="8" width="38" height="48" rx="7" fill="#fdb57a"/>
+      <rect x="18" y="4" width="38" height="48" rx="7" fill="rgba(255,255,255,0.25)" stroke="rgba(255,255,255,0.6)" stroke-width="2"/>
+      <line x1="26" y1="18" x2="48" y2="18" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="26" y1="27" x2="48" y2="27" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="26" y1="36" x2="40" y2="36" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+    </svg>
+    <div class="auth-logo">Integra<span> Más</span></div>
+    <div class="auth-sub">Reserva de Consultorios</div>
+  </div>
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" id="tab-login" onclick="switchAuth('login')">Ingresar</button>
+      <button type="button" class="auth-tab" id="tab-reg" onclick="switchAuth('register')">Registrarse</button>
+    </div>
+    <!-- LOGIN -->
+    <div id="form-login">
+      <div class="field"><label>Email</label><input type="email" id="l-email" placeholder="tu@email.com" autocomplete="email"></div>
+      <div class="field"><label>Contraseña</label><input type="password" id="l-pw" placeholder="••••••••" autocomplete="current-password"></div>
+      <div id="l-msg"></div>
+      <button type="button" class="auth-btn" id="btn-login">Ingresar</button>
+    </div>
+    <!-- REGISTER -->
+    <div id="form-reg" style="display:none">
+      <div class="photo-picker">
+        <div class="photo-circle" id="regPhotoCircle">
+          <span class="photo-ico">👤</span>
+          <div class="photo-overlay">📷</div>
+        </div>
+        <input type="file" id="reg-photo-input" accept="image/*">
+        <span class="photo-lbl">Foto de perfil (opcional)</span>
+      </div>
+      <div class="field"><label>Nombre completo *</label><input type="text" id="r-name" placeholder="Dr. Juan Pérez" autocomplete="name"></div>
+      <div class="field"><label>Email *</label><input type="email" id="r-email" placeholder="tu@email.com" autocomplete="email"></div>
+      <div class="field"><label>Teléfono</label><input type="tel" id="r-phone" placeholder="+54 9 11 1234-5678" autocomplete="tel"></div>
+      <div class="field"><label>Contraseña *</label><input type="password" id="r-pw" placeholder="Min. 6 caracteres" autocomplete="new-password"></div>
+      <div id="r-msg"></div>
+      <button type="button" class="auth-btn" id="btn-register">Crear cuenta</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+
+<div id="app" style="display:none">
+  <div class="top-bar">
+    <div class="logo">
+      <svg class="logo-ico" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="3" y="4" width="16" height="21" rx="3" fill="#fdb57a"/>
+        <rect x="9" y="1" width="16" height="21" rx="3" fill="rgba(255,255,255,0.3)" stroke="rgba(255,255,255,0.7)" stroke-width="1.2"/>
+        <line x1="13" y1="8" x2="22" y2="8" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="13" y1="12" x2="22" y2="12" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="13" y1="16" x2="18" y2="16" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      Integra<span> Más</span>
+    </div>
+    <div class="user-chip" id="userChip">
+      <div class="chip-av" id="chipAv"></div>
+      <span class="uname" id="chipName"></span>
+    </div>
+  </div>
+
+  <div class="page-content" id="pageContent">
+    <!-- RESERVAR -->
+    <div class="page active inner" id="page-reservar">
+      <div class="stepper">
+        <div class="step active" id="si1"><div class="snum">1</div><div class="sinfo"><div class="slbl">Fecha</div><div class="sval" id="sv1">Elegir</div></div></div>
+        <div class="sarrow">›</div>
+        <div class="step pending" id="si2"><div class="snum">2</div><div class="sinfo"><div class="slbl">Horario</div><div class="sval" id="sv2">Inicio y fin</div></div></div>
+        <div class="sarrow">›</div>
+        <div class="step pending" id="si3"><div class="snum">3</div><div class="sinfo"><div class="slbl">Consultorio</div><div class="sval" id="sv3">Elegir</div></div></div>
+      </div>
+      <div id="s1" class="card">
+        <div class="ch"><div><h3>📅 Fecha</h3><p>Tocá un día disponible</p></div></div>
+        <div class="cb">
+          <div class="cal-nav">
+            <button type="button" class="cnb" id="calPrevBtn">‹</button>
+            <span class="cmth" id="calMonth"></span>
+            <button type="button" class="cnb" id="calNextBtn">›</button>
+          </div>
+          <div class="cgrid" id="calGrid"></div>
+        </div>
+      </div>
+      <div id="s2" class="card" style="display:none">
+        <div class="ch"><div><h3>🕐 Horario</h3><p id="s2sub"></p></div><button type="button" class="btn btn-ghost btn-sm" id="s2back">← Fecha</button></div>
+        <div class="cb" id="s2body"></div>
+      </div>
+      <div id="s3" class="card" style="display:none">
+        <div class="ch"><div><h3>🏥 Consultorio</h3><p id="s3sub"></p></div><button type="button" class="btn btn-ghost btn-sm" id="s3back">← Horario</button></div>
+        <div class="cb"><p style="font-size:12px;color:var(--ink3);margin-bottom:12px">Rojo = ocupado en tu horario.</p><div class="consul-grid" id="consulGrid"></div></div>
+      </div>
+      <div id="confirmBar" style="display:none" class="confirm-bar">
+        <div><div class="confirm-title" id="confirmTitle"></div><div class="confirm-sub" id="confirmSub"></div></div>
+        <div style="display:flex;gap:8px">
+          <button type="button" class="btn btn-ow btn-sm" id="cancelConfirmBtn">✕</button>
+          <button type="button" class="btn btn-white btn-sm" id="confirmBtn">✓ Confirmar</button>
+        </div>
+      </div>
+    </div>
+
+```
+<!-- MIS RESERVAS -->
+<div class="page inner" id="page-misreservas"><div id="myContent"></div></div>
+
+<!-- AGENDA -->
+<div class="page inner" id="page-agenda">
+  <div class="stats-grid" id="statsGrid"></div>
+  <div class="card">
+    <div class="ch"><div><h3>📋 Agenda General</h3><p>Todos los turnos</p></div></div>
+    <div class="filter-row">
+      <select class="fsel" id="fC"><option value="">Todos</option></select>
+      <select class="fsel" id="fD"><option value="">Fechas</option></select>
+    </div>
+    <div id="agendaContent"></div>
+  </div>
+</div>
+
+<!-- DIRECTORIO -->
+<div class="page inner" id="page-directorio"><div id="dirContent"></div></div>
+
+<!-- PERFIL -->
+<div class="page inner" id="page-perfil"><div id="perfilContent"></div></div>
+
+<!-- ADMIN -->
+<div class="page inner" id="page-admin"><div id="adminContent"></div></div>
+```
+
+  </div>
+
+  <nav class="bottom-nav">
+    <button type="button" class="nav-item active" id="nav-reservar" data-page="reservar"><span class="nav-ico">📅</span><span class="nav-lbl">Reservar</span></button>
+    <button type="button" class="nav-item" id="nav-misreservas" data-page="misreservas"><span class="nav-ico">📋</span><span class="nav-lbl">Mis turnos</span></button>
+    <button type="button" class="nav-item" id="nav-agenda" data-page="agenda"><span class="nav-ico">🕐</span><span class="nav-lbl">Agenda</span></button>
+    <button type="button" class="nav-item" id="nav-directorio" data-page="directorio"><span class="nav-ico">👥</span><span class="nav-lbl">Equipo</span></button>
+    <button type="button" class="nav-item" id="nav-admin" data-page="admin" style="display:none"><span class="nav-ico">⚙️</span><span class="nav-lbl">Admin</span></button>
+  </nav>
+</div>
+
+<!-- MODALS -->
+
+<div class="modal-overlay" id="modalLogout" style="display:none">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="mLogoutName"></div>
+    <p style="font-size:13px;color:var(--ink2);margin-bottom:16px" id="mLogoutEmail"></p>
+    <button type="button" class="btn btn-danger btn-full" style="margin-bottom:10px" id="btnDoLogout">✕ Cerrar sesión</button>
+    <button type="button" class="btn btn-ghost btn-full" id="btnGoPerfil">✎ Editar mi perfil</button>
+  </div>
+</div>
+<div class="modal-overlay" id="modalEditUser" style="display:none">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Editar usuario</div>
+    <input type="hidden" id="eu-id">
+    <div class="field"><label>Nombre</label><input type="text" id="eu-name"></div>
+    <div class="field"><label>Email</label><input type="email" id="eu-email"></div>
+    <div class="field"><label>Teléfono</label><input type="tel" id="eu-phone"></div>
+    <div class="field"><label>Rol</label><select id="eu-rol"><option value="user">Usuario</option><option value="admin">Administrador</option></select></div>
+    <div class="field"><label>Nueva contraseña (vacío = no cambiar)</label><input type="password" id="eu-pw" placeholder="••••••••"></div>
+    <div id="eu-msg"></div>
+    <div style="display:flex;gap:10px;margin-top:10px">
+      <button type="button" class="btn btn-ghost btn-full" id="btnCancelEditUser">Cancelar</button>
+      <button type="button" class="btn btn-primary btn-full" id="btnSaveEditUser">Guardar</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalEditConsul" style="display:none">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Editar consultorio</div>
+    <input type="hidden" id="ec-id">
+    <div class="photo-picker" style="margin-bottom:16px">
+      <div class="photo-circle" id="ecPhotoCircle" style="width:110px;height:75px;border-radius:10px;background-size:cover;background-position:center">
+        <span class="photo-ico" id="ecPhotoIco">🏥</span>
+        <div class="photo-overlay" style="border-radius:10px">📷</div>
+      </div>
+      <input type="file" id="ec-photo-input" accept="image/*">
+      <span class="photo-lbl">Foto del consultorio</span>
+    </div>
+    <div class="field"><label>Nombre</label><input type="text" id="ec-name"></div>
+    <div class="field"><label>Descripción</label><input type="text" id="ec-desc" placeholder="Equipamiento, especialidad..."></div>
+    <div id="ec-msg"></div>
+    <div style="display:flex;gap:10px;margin-top:10px">
+      <button type="button" class="btn btn-ghost btn-full" id="btnCancelEditConsul">Cancelar</button>
+      <button type="button" class="btn btn-primary btn-full" id="btnSaveEditConsul">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" style="display:none"></div>
+
+<script>
+// ================================================================
+//  INTEGRA MÁS — todo el JS corre dentro de DOMContentLoaded
+// ================================================================
+document.addEventListener('DOMContentLoaded', function() {
+
+// === CONFIG (reemplazar cuando tengas Google Apps Script) ===
+var API_URL = 'https://script.google.com/macros/s/AKfycbz2wDqw6TN6G40mumNEfiHHPRRCqB0bUt4JfalGVdogQbl558P3yAWaMwNOPEjrkoIx/exec';
+// ===========================================================
+
+// --- ESTADO GLOBAL ---
+var COLS = ['#e74c3c','#e07830','#c0392b','#8e44ad','#d68910','#c25a00','#b84a00','#a0390d'];
+var CONSULTORIOS = [];
+for (var _i = 0; _i < 8; _i++) {
+  CONSULTORIOS.push({ id: String(_i+1), name: 'Consultorio '+(_i+1), color: COLS[_i], foto: '', descripcion: '' });
+}
+var MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var DOWS   = ['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
+
+var CU   = null;   // currentUser
+var RR   = [];     // reservations
+var AU   = [];     // allUsers
+var SD=null, SS=null, SE=null, SC=null;  // selDate, selStart, selEnd, selConsul
+var CY, CM;
+var photReg = '', photEc = '';
+
+// --- HELPERS ---
+function G(id) { return document.getElementById(id); }
+function pad(n) { return n < 10 ? '0'+n : ''+n; }
+function today() { return fmtD(new Date()); }
+function fmtD(d) { return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function fmtDS(s) { return new Date(s+'T12:00').toLocaleDateString('es-AR',{day:'2-digit',month:'short'}); }
+function fmtDN(s) { return new Date(s+'T12:00').toLocaleDateString('es-AR',{weekday:'long',day:'2-digit',month:'long'}); }
+function fmtH(h)  { return pad(parseInt(h))+':00'; }
+function byId(arr,id) { var s=String(id); for(var i=0;i<arr.length;i++) if(String(arr[i].id)===s) return arr[i]; return null; }
+function ini(n)   { var p=n.trim().split(' '),s=p[0][0].toUpperCase(); if(p.length>1)s+=p[p.length-1][0].toUpperCase(); return s; }
+function avatarColor(n) {
+  var c=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#e74c3c','#b84a00','#a0390d'], h=0;
+  for(var i=0;i<n.length;i++){h=(h*31+n.charCodeAt(i))&0xffffffff;} return c[Math.abs(h)%c.length];
+}
+function mkEl(tag,cls,txt) { var e=document.createElement(tag); if(cls)e.className=cls; if(txt!==undefined)e.textContent=txt; return e; }
+function mkBtn(cls,txt,fn)  { var b=mkEl('button',cls,txt); b.type='button'; b.addEventListener('click',fn); return b; }
+function mkAv(nombre,foto,size) {
+  size=size||44;
+  var d=mkEl('div');
+  d.style.cssText='width:'+size+'px;height:'+size+'px;border-radius:50%;flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:'+(size*0.34|0)+'px;font-weight:700;color:#fff';
+  if(foto){d.style.background='url('+foto+') center/cover';}
+  else{d.style.background=avatarColor(nombre);d.textContent=ini(nombre);}
+  return d;
+}
+function showToast(msg,type) {
+  var t=G('toast'); t.textContent=msg; t.className='toast'+(type?' '+type:''); t.style.display='block';
+  clearTimeout(t._t); t._t=setTimeout(function(){t.style.display='none';},3200);
+}
+function setMsg(id,txt,cls) { var el=G(id); if(!el)return; el.innerHTML=txt?'<div class="msg '+cls+'">'+txt+'</div>':''; }
+function closeModal(id) { G(id).style.display='none'; }
+
+// --- PHOTO HANDLER ---
+function handlePhoto(prefix, input) {
+  var file=input.files[0]; if(!file)return;
+  if(file.size>600000){showToast('Imagen muy grande (max 600KB)','err');return;}
+  var r=new FileReader();
+  r.onload=function(e){
+    var data=e.target.result;
+    if(prefix==='reg'){
+      photReg=data;
+      var c=G('regPhotoCircle'); c.style.backgroundImage='url('+data+')'; c.querySelector('.photo-ico').style.display='none';
+    } else if(prefix==='ec'){
+      photEc=data;
+      var c=G('ecPhotoCircle'); c.style.backgroundImage='url('+data+')'; G('ecPhotoIco').style.display='none';
+    } else if(prefix==='profile'){
+      api({action:'updateProfile',userId:CU.id,foto:data},function(err,res){
+        if(err||!res.ok){showToast('Error al guardar foto','err');return;}
+        CU=res.user; saveLocal(); updateChip(); showToast('Foto actualizada','ok'); renderPerfil();
+      });
+    }
+  };
+  r.readAsDataURL(file);
+}
+
+// --- API ---
+function api(p, cb) {
+  // Demo mode: if no real API configured, always use local demo
+  var isDemo = (!API_URL || API_URL.indexOf('TU_URL') !== -1 || API_URL.indexOf('apps_script') !== -1);
+  if(isDemo) { apiDemo(p, cb); return; }
+  var q=Object.keys(p).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(String(p[k]));}).join('&');
+  var x=new XMLHttpRequest();
+  x.open('GET', API_URL+'?'+q, true);
+  x.onload=function(){
+    try{ cb(null, JSON.parse(x.responseText)); }
+    catch(e){ cb(null, {ok:false, error:'Error de respuesta del servidor'}); }
+  };
+  x.onerror=function(){ cb(null, {ok:false, error:'Sin conexión'}); };
+  x.ontimeout=function(){ cb(null, {ok:false, error:'Tiempo de espera agotado'}); };
+  x.timeout = 10000;
+  x.send();
+}
+
+// --- DEMO DATA ---
+var DR=(function(){
+  var t=today(), tm=fmtD(new Date(Date.now()+86400000));
+  return [
+    {id:'r1',consulId:'1',fecha:t, startH:9, endH:11,userId:'u1',userName:'Dr. García'},
+    {id:'r2',consulId:'2',fecha:t, startH:8, endH:10,userId:'u2',userName:'Dra. Martínez'},
+    {id:'r3',consulId:'3',fecha:t, startH:10,endH:12,userId:'u1',userName:'Dr. García'},
+    {id:'r4',consulId:'5',fecha:tm,startH:9, endH:11,userId:'u2',userName:'Dra. Martínez'}
+  ];
+})();
+function hw(pw){var h=0;for(var i=0;i<pw.length;i++){h=((h<<5)-h)+pw.charCodeAt(i);h|=0;}return 'h_'+Math.abs(h).toString(36)+'_'+pw.length;}
+var DU=[
+  {id:'u0',nombre:'Administrador',email:'admin@integra.com',pw:hw('admin123'),rol:'admin',tel:'',foto:''},
+  {id:'u1',nombre:'Dr. García',   email:'garcia@demo.com',  pw:hw('123456'), rol:'user', tel:'+5491111111111',foto:''},
+  {id:'u2',nombre:'Dra. Martínez',email:'martinez@demo.com',pw:hw('123456'), rol:'user', tel:'+5491122222222',foto:''}
+];
+function us(u){return {id:u.id,nombre:u.nombre,email:u.email,rol:u.rol,telefono:u.tel||'',foto:u.foto||''};}
+
+function apiDemo(p,cb){
+  setTimeout(function(){
+    var i,u,r;
+    if(p.action==='login'){
+      for(i=0;i<DU.length;i++){u=DU[i];if(u.email.toLowerCase()===p.email.toLowerCase()&&u.pw===hw(p.password))return cb(null,{ok:true,user:us(u)});}
+      return cb(null,{ok:false,error:'Email o contraseña incorrectos'});
+    }
+    if(p.action==='register'){
+      for(i=0;i<DU.length;i++) if(DU[i].email.toLowerCase()===p.email.toLowerCase()) return cb(null,{ok:false,error:'El email ya está registrado'});
+      var nu={id:'u'+Date.now(),nombre:p.nombre,email:p.email.toLowerCase(),pw:hw(p.password),rol:'user',tel:p.telefono||'',foto:p.foto||''};
+      DU.push(nu); return cb(null,{ok:true,user:us(nu)});
+    }
+    if(p.action==='getReservations'){
+      var cs=CONSULTORIOS.map(function(c){return {id:c.id,nombre:c.name,color:c.color,foto:c.foto,descripcion:c.descripcion};});
+      return cb(null,{ok:true,reservations:JSON.parse(JSON.stringify(DR)),consultorios:cs});
+    }
+    if(p.action==='addReservation'){
+      var sH=parseInt(p.startH),eH=parseInt(p.endH),cId=String(p.consulId);
+      for(i=0;i<DR.length;i++){r=DR[i];if(r.consulId===cId&&r.fecha===p.fecha&&!(eH<=r.startH||sH>=r.endH))return cb(null,{ok:false,error:'El consultorio ya está reservado en ese horario'});}
+      var nid='r'+Date.now(); DR.push({id:nid,consulId:cId,fecha:p.fecha,startH:sH,endH:eH,userId:p.userId,userName:p.userName||''});
+      return cb(null,{ok:true,id:nid});
+    }
+    if(p.action==='cancelReservation'){
+      for(i=0;i<DR.length;i++){if(DR[i].id===String(p.id)){if(DR[i].userId!==String(p.userId))return cb(null,{ok:false,error:'Sin permiso'});DR.splice(i,1);return cb(null,{ok:true});}}
+      return cb(null,{ok:false,error:'Reserva no encontrada'});
+    }
+    if(p.action==='adminCancelReservation'){
+      for(i=0;i<DR.length;i++){if(DR[i].id===String(p.id)){DR.splice(i,1);return cb(null,{ok:true});}}
+      return cb(null,{ok:false,error:'No encontrada'});
+    }
+    if(p.action==='getUsers') return cb(null,{ok:true,users:DU.map(us)});
+    if(p.action==='updateUser'){
+      for(i=0;i<DU.length;i++){if(DU[i].id===String(p.id)){
+        if(p.nombre)DU[i].nombre=p.nombre; if(p.email)DU[i].email=p.email;
+        if(p.rol)DU[i].rol=p.rol; if(p.telefono!==undefined)DU[i].tel=p.telefono;
+        if(p.password)DU[i].pw=hw(p.password); return cb(null,{ok:true});
+      }}
+      return cb(null,{ok:false,error:'No encontrado'});
+    }
+    if(p.action==='deleteUser'){
+      for(i=0;i<DU.length;i++){if(DU[i].id===String(p.id)){DU.splice(i,1);return cb(null,{ok:true});}}
+      return cb(null,{ok:false,error:'No encontrado'});
+    }
+    if(p.action==='updateProfile'){
+      for(i=0;i<DU.length;i++){if(DU[i].id===String(p.userId)){
+        if(p.nombre)DU[i].nombre=p.nombre; if(p.telefono!==undefined)DU[i].tel=p.telefono;
+        if(p.foto!==undefined)DU[i].foto=p.foto; if(p.password)DU[i].pw=hw(p.password);
+        return cb(null,{ok:true,user:us(DU[i])});
+      }}
+      return cb(null,{ok:false,error:'No encontrado'});
+    }
+    if(p.action==='updateConsultorio'){
+      for(i=0;i<CONSULTORIOS.length;i++){if(CONSULTORIOS[i].id===String(p.id)){
+        if(p.nombre)CONSULTORIOS[i].name=p.nombre; if(p.foto!==undefined)CONSULTORIOS[i].foto=p.foto;
+        if(p.descripcion!==undefined)CONSULTORIOS[i].descripcion=p.descripcion; return cb(null,{ok:true});
+      }}
+      return cb(null,{ok:false,error:'No encontrado'});
+    }
+    cb(null,{ok:false,error:'Acción desconocida'});
+  }, 250);
+}
+
+// --- AUTH ---
+function switchAuth(tab){
+  G('tab-login').className='auth-tab'+(tab==='login'?' active':'');
+  G('tab-reg').className='auth-tab'+(tab==='register'?' active':'');
+  G('form-login').style.display=tab==='login'?'block':'none';
+  G('form-reg').style.display=tab==='register'?'block':'none';
+}
+function doLogin(){
+  var email=G('l-email').value.trim(), pw=G('l-pw').value;
+  if(!email||!pw){setMsg('l-msg','Completá todos los campos','err');return;}
+  setMsg('l-msg','Ingresando...','');
+  api({action:'login',email:email,password:pw},function(err,res){
+    if(err||!res.ok){setMsg('l-msg',res&&res.error||err||'Error','err');return;}
+    startSession(res.user);
+  });
+}
+function doRegister(){
+  var name=G('r-name').value.trim(), email=G('r-email').value.trim(), phone=G('r-phone').value.trim(), pw=G('r-pw').value;
+  if(!name||!email||!pw){setMsg('r-msg','Nombre, email y contraseña son obligatorios','err');return;}
+  if(pw.length<6){setMsg('r-msg','La contraseña debe tener al menos 6 caracteres','err');return;}
+  setMsg('r-msg','Creando cuenta...','');
+  api({action:'register',nombre:name,email:email,password:pw,telefono:phone,foto:photReg},function(err,res){
+    if(err||!res.ok){setMsg('r-msg',res&&res.error||err||'Error','err');return;}
+    setMsg('r-msg','✓ Cuenta creada!','ok');
+    setTimeout(function(){startSession(res.user);},600);
+  });
+}
+
+function startSession(user){
+  CU=user; saveLocal();
+  G('auth-screen').style.display='none';
+  G('app').style.display='flex';
+  updateChip();
+  G('nav-admin').style.display=user.rol==='admin'?'flex':'none';
+  var n=new Date(); CY=n.getFullYear(); CM=n.getMonth();
+  loadRR(function(){ renderCalendar(); updateStepper(); });
+}
+function saveLocal(){ try{localStorage.setItem('im_user',JSON.stringify(CU));}catch(e){} }
+function updateChip(){
+  var av=G('chipAv'); G('chipName').textContent=CU.nombre.split(' ')[0];
+  if(CU.foto){av.style.backgroundImage='url('+CU.foto+')';av.style.background='';av.textContent='';}
+  else{av.style.backgroundImage='none';av.style.background=avatarColor(CU.nombre);av.textContent=ini(CU.nombre);}
+}
+function doLogout(){
+  CU=null; RR=[]; AU=[];
+  try{localStorage.removeItem('im_user');}catch(e){}
+  closeModal('modalLogout');
+  G('app').style.display='none'; G('auth-screen').style.display='flex';
+  resetAll();
+}
+
+// --- NAV ---
+function showPage(name){
+  var pages=['reservar','misreservas','agenda','directorio','perfil','admin'];
+  for(var i=0;i<pages.length;i++){
+    var pg=G('page-'+pages[i]), nb=G('nav-'+pages[i]);
+    if(pg) pg.className='page'+(pages[i]===name?' active inner':' inner');
+    if(nb) nb.className='nav-item'+(pages[i]===name?' active':'');
+  }
+  G('pageContent').scrollTop=0;
+  if(name==='misreservas') loadRR(function(){renderMR();});
+  if(name==='agenda')      loadRR(function(){renderAgenda();});
+  if(name==='directorio')  loadDir();
+  if(name==='perfil')      renderPerfil();
+  if(name==='admin')       loadAdmin();
+}
+
+// --- DATA ---
+function loadRR(cb){
+  api({action:'getReservations'},function(err,res){
+    if(err||!res.ok){if(cb)cb();return;}
+    RR=res.reservations||[];
+    for(var i=0;i<RR.length;i++){
+      RR[i].startH=parseInt(RR[i].startH); RR[i].endH=parseInt(RR[i].endH);
+      RR[i].consulId=String(RR[i].consulId); RR[i].id=String(RR[i].id); RR[i].userId=String(RR[i].userId);
+    }
+    if(res.consultorios&&res.consultorios.length){
+      CONSULTORIOS=res.consultorios.map(function(c){return {id:String(c.id),name:c.nombre||c.name,color:c.color,foto:c.foto||'',descripcion:c.descripcion||''};});
+    }
+    if(cb)cb();
+  });
+}
+
+// --- CALENDAR ---
+function renderCalendar(){
+  G('calMonth').textContent=MONTHS[CM]+' '+CY;
+  var tod=today(), fd=new Date(CY,CM,1).getDay(), days=new Date(CY,CM+1,0).getDate();
+  var rd={}; for(var i=0;i<RR.length;i++) rd[RR[i].fecha]=true;
+  var grid=G('calGrid'); grid.innerHTML='';
+  for(var d=0;d<DOWS.length;d++){var h=mkEl('div','cdow',DOWS[d]);grid.appendChild(h);}
+  for(var e=0;e<fd;e++) grid.appendChild(mkEl('div','cday'));
+  for(var d=1;d<=days;d++){
+    var ds=CY+'-'+pad(CM+1)+'-'+pad(d);
+    var cell=mkEl('div','',String(d));
+    var cls='cday';
+    if(ds<tod) cls+=' past';
+    else if(ds===SD) cls+=' sel';
+    else if(ds===tod) cls+=' today pick';
+    else cls+=' pick';
+    if(rd[ds]) cls+=' hres';
+    cell.className=cls;
+    if(ds>=tod)(function(date){cell.addEventListener('click',function(){pickDate(date);});})(ds);
+    grid.appendChild(cell);
+  }
+}
+function pickDate(ds){ SD=ds; SS=null; SE=null; SC=null; renderCalendar(); updateStepper(); goStep(2); }
+
+// --- STEPPER ---
+function goStep(n){
+  G('s1').style.display=n===1?'block':'none';
+  G('s2').style.display=n===2?'block':'none';
+  G('s3').style.display=n===3?'block':'none';
+  G('confirmBar').style.display='none';
+  if(n===2) renderS2();
+  if(n===3) renderS3();
+  updateStepper();
+}
+function setSt(i,val,cls){ G('si'+i).className='step '+cls; G('sv'+i).textContent=val; }
+function updateStepper(){
+  setSt(1,SD?fmtDS(SD):'Elegir',SD?'done':'active');
+  if(SS!==null&&SE!==null) setSt(2,fmtH(SS)+'-'+fmtH(SE),'done');
+  else setSt(2,'Inicio y fin',SD?'active':'pending');
+  setSt(3,SC?SC.name:'Elegir',SC?'done':(SS!==null&&SE!==null?'active':'pending'));
+}
+
+// --- STEP 2 ---
+function renderS2(){
+  G('s2sub').textContent=fmtDN(SD);
+  var body=G('s2body'); body.innerHTML='';
+  if(SS!==null&&SE!==null){
+    var row=mkEl('div','tprev');
+    row.innerHTML='🕐 <strong>'+fmtH(SS)+' – '+fmtH(SE)+'</strong> · '+(SE-SS)+'h';
+    row.appendChild(mkBtn('tprev-chg','Cambiar',function(){resetTime();}));
+    body.appendChild(row);
+    body.appendChild(mkBtn('btn btn-primary btn-full','Ver disponibilidad →',function(){goStep(3);}));
+    return;
+  }
+  if(SS===null){
+    body.appendChild(mkEl('div','slbl2','Hora de inicio'));
+    var pills=mkEl('div','pills');
+    for(var i=8;i<20;i++)(function(hr){var p=mkEl('div','pill',fmtH(hr));p.addEventListener('click',function(){pickSS(hr);});pills.appendChild(p);})(i);
+    body.appendChild(pills);
+  } else {
+    var row=mkEl('div','tprev');
+    row.innerHTML='🕐 Inicio: <strong>'+fmtH(SS)+'</strong>';
+    row.appendChild(mkBtn('tprev-chg','Cambiar',function(){resetTime();}));
+    body.appendChild(row);
+    body.appendChild(mkEl('div','slbl2','Hora de fin'));
+    var pills=mkEl('div','pills');
+    for(var i=SS+1;i<=20;i++)(function(hr){var p=mkEl('div','pill',fmtH(hr));p.addEventListener('click',function(){pickSE(hr);});pills.appendChild(p);})(i);
+    body.appendChild(pills);
+  }
+}
+function pickSS(h){SS=h;SE=null;SC=null;renderS2();updateStepper();}
+function pickSE(h){SE=h;SC=null;renderS2();updateStepper();}
+function resetTime(){SS=null;SE=null;SC=null;renderS2();updateStepper();}
+
+// --- STEP 3 ---
+function conflict(cid,fecha,s,e){
+  var ci=String(cid);
+  for(var i=0;i<RR.length;i++){var r=RR[i];if(r.consulId===ci&&r.fecha===fecha&&!(e<=r.startH||s>=r.endH))return r;}
+  return null;
+}
+function renderS3(){
+  G('s3sub').textContent=fmtDN(SD)+' · '+fmtH(SS)+' – '+fmtH(SE);
+  G('confirmBar').style.display='none';
+  var grid=G('consulGrid'); grid.innerHTML='';
+  for(var i=0;i<CONSULTORIOS.length;i++){
+    var c=CONSULTORIOS[i], cf=conflict(c.id,SD,SS,SE), isSel=SC&&SC.id===c.id;
+    var div=mkEl('div');
+    var badge=mkEl('span','cbadge '+(cf?'busy':'free'),cf?'Ocupado':'Libre');
+    var imgDiv=mkEl('div','cc-img');
+    if(c.foto){var img=mkEl('img');img.src=c.foto;imgDiv.appendChild(img);}
+    else{var dot=mkEl('div','cdot');dot.style.background=c.color;imgDiv.appendChild(dot);}
+    div.appendChild(badge); div.appendChild(imgDiv);
+    div.appendChild(mkEl('div','cname',c.name));
+    var st=mkEl('div','cstat '+(cf?'busy':'free'),cf?fmtH(cf.startH)+'-'+fmtH(cf.endH):'Disponible');
+    div.appendChild(st);
+    if(cf){
+      div.className='cc occ';
+      div.appendChild(mkEl('div','cwho',cf.userName||'–'));
+    } else {
+      div.className='cc pick'+(isSel?' sel':'');
+      (function(consul){div.addEventListener('click',function(){pickSC(consul);});})(c);
+    }
+    grid.appendChild(div);
+  }
+}
+function pickSC(c){
+  SC=c; renderS3(); updateStepper();
+  G('confirmTitle').textContent=c.name+' · '+fmtH(SS)+' – '+fmtH(SE);
+  G('confirmSub').textContent=fmtDN(SD)+' · '+(SE-SS)+'h';
+  G('confirmBar').style.display='flex';
+  setTimeout(function(){G('confirmBar').scrollIntoView({behavior:'smooth',block:'nearest'});},80);
+}
+
+// --- CONFIRM ---
+function confirmBooking(){
+  if(!CU||!SC||SS===null||SE===null||!SD) return;
+  if(conflict(SC.id,SD,SS,SE)){showToast('Conflicto: consultorio ya ocupado','err');renderS3();return;}
+  var btn=G('confirmBtn'); btn.textContent='Guardando...'; btn.disabled=true;
+  var sn={id:'',consulId:SC.id,fecha:SD,startH:SS,endH:SE,userId:CU.id,userName:CU.nombre};
+  var savedName=SC.name;
+  api({action:'addReservation',userId:sn.userId,userName:sn.userName,consulId:sn.consulId,fecha:sn.fecha,startH:sn.startH,endH:sn.endH},
+    function(err,res){
+      btn.textContent='✓ Confirmar'; btn.disabled=false;
+      if(err||!res.ok){showToast(res&&res.error||'Error al guardar','err');return;}
+      sn.id=String(res.id); RR.push(sn);
+      renderCalendar(); showToast('Reserva confirmada: '+savedName,'ok'); resetAll();
+    }
+  );
+}
+function resetAll(){
+  SD=null;SS=null;SE=null;SC=null;
+  var n=new Date();CY=n.getFullYear();CM=n.getMonth();
+  renderCalendar();goStep(1);updateStepper();
+}
+
+// --- MIS RESERVAS ---
+function renderMR(){
+  var cnt=G('myContent'); cnt.innerHTML='';
+  var tod=today(), myR=[], up=[], past=[];
+  for(var i=0;i<RR.length;i++) if(RR[i].userId===CU.id) myR.push(RR[i]);
+  myR.sort(function(a,b){return a.fecha<b.fecha?-1:a.fecha>b.fecha?1:a.startH-b.startH;});
+  for(var i=0;i<myR.length;i++){if(myR[i].fecha>=tod)up.push(myR[i]);else past.push(myR[i]);}
+
+  var hdr=mkEl('div');
+  hdr.style.cssText='display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:14px';
+  hdr.appendChild(mkAv(CU.nombre,CU.foto,46));
+  var hi=mkEl('div'); hi.innerHTML='<div style="font-family:DM Serif Display,serif;font-size:17px">'+CU.nombre+'</div><div style="font-size:12px;color:var(--ink3)">'+myR.length+' reservas · '+up.length+' próximas</div>';
+  hdr.appendChild(hi); cnt.appendChild(hdr);
+
+  if(!myR.length){
+    cnt.appendChild(function(){var e=mkEl('div','empty');e.innerHTML='<div class="ei">📋</div><h3>Sin reservas</h3><p>Reservá desde la pestaña principal.</p>';return e;}());
+    return;
+  }
+  function makeCard(r, canCancel){
+    var c=byId(CONSULTORIOS,r.consulId), cname=c?c.name:'C'+r.consulId, ccolor=c?c.color:'#999', isT=r.fecha===tod;
+    var div=mkEl('div','res-card'); div.style.borderColor=ccolor;
+    var info=mkEl('div');
+    info.innerHTML='<div class="res-title">'+cname+'</div><div class="res-meta"><span>📅 '+fmtDS(r.fecha)+(isT?' <strong style="color:var(--accent)">· HOY</strong>':'')+'</span><span>🕐 '+fmtH(r.startH)+' – '+fmtH(r.endH)+'</span><span>⏱ '+(r.endH-r.startH)+'h</span></div>';
+    div.appendChild(info);
+    if(canCancel){
+      (function(rid){div.appendChild(mkBtn('btn btn-danger btn-sm','✕',function(){cancelRes(rid);}));})(String(r.id));
+    }
+    return div;
+  }
+  if(up.length){ cnt.appendChild(mkEl('div','sec-title','Próximas reservas')); for(var i=0;i<up.length;i++) cnt.appendChild(makeCard(up[i],true)); }
+  if(past.length){
+    var t=mkEl('div','sec-title','Historial'); t.style.cssText='color:var(--ink2);margin-top:18px'; cnt.appendChild(t);
+    var wrap=mkEl('div'); wrap.style.opacity='0.55';
+    for(var i=0;i<past.length;i++) wrap.appendChild(makeCard(past[i],false));
+    cnt.appendChild(wrap);
+  }
+}
+function cancelRes(rid){
+  if(!confirm('¿Cancelar esta reserva?')) return;
+  api({action:'cancelReservation',id:rid,userId:CU.id},function(err,res){
+    if(err||!res.ok){showToast(res&&res.error||'Error','err');return;}
+    loadRR(function(){renderMR();renderCalendar();}); showToast('Reserva cancelada','ok');
+  });
+}
+
+// --- AGENDA ---
+function renderAgenda(){
+  var tod=today(), tr=0, uc={}, uu={};
+  for(var i=0;i<RR.length;i++){var r=RR[i];if(r.fecha===tod)tr++;uc[r.consulId]=1;uu[r.userId]=1;}
+  G('statsGrid').innerHTML='<div class="stat-card"><div class="stat-v">'+RR.length+'</div><div class="stat-l">Total</div></div><div class="stat-card"><div class="stat-v">'+tr+'</div><div class="stat-l">Hoy</div></div><div class="stat-card"><div class="stat-v">'+Object.keys(uc).length+'</div><div class="stat-l">Consultorios</div></div><div class="stat-card"><div class="stat-v">'+Object.keys(uu).length+'</div><div class="stat-l">Usuarios</div></div>';
+  var fC=G('fC'),fD=G('fD'),vC=fC.value,vD=fD.value;
+  var optC='<option value="">Todos</option>'; for(var i=0;i<CONSULTORIOS.length;i++) optC+='<option value="'+CONSULTORIOS[i].id+'">'+CONSULTORIOS[i].name+'</option>';
+  fC.innerHTML=optC; fC.value=vC;
+  var dates=[]; for(var i=0;i<RR.length;i++) if(dates.indexOf(RR[i].fecha)<0) dates.push(RR[i].fecha); dates.sort();
+  var optD='<option value="">Fechas</option>'; for(var i=0;i<dates.length;i++) optD+='<option value="'+dates[i]+'">'+fmtDS(dates[i])+'</option>';
+  fD.innerHTML=optD; fD.value=vD;
+  var f=[]; for(var i=0;i<RR.length;i++){var r=RR[i];if(vC&&r.consulId!==vC)continue;if(vD&&r.fecha!==vD)continue;f.push(r);}
+  f.sort(function(a,b){return a.fecha<b.fecha?-1:a.fecha>b.fecha?1:a.startH-b.startH;});
+  var cnt=G('agendaContent'); cnt.innerHTML='';
+  if(!f.length){var e=mkEl('div','empty');e.innerHTML='<div class="ei">📅</div><h3>Sin reservas</h3>';cnt.appendChild(e);return;}
+  var tbody=mkEl('tbody');
+  for(var i=0;i<f.length;i++){
+    var r=f[i],c=byId(CONSULTORIOS,r.consulId),cname=c?c.name:'C'+r.consulId,ccolor=c?c.color:'#999';
+    var isOwn=r.userId===CU.id, isAdm=CU.rol==='admin';
+    var tr2=mkEl('tr');
+    var td0=mkEl('td'); td0.innerHTML='<div style="display:flex;align-items:center;gap:6px"><div style="width:8px;height:8px;border-radius:50%;background:'+ccolor+'"></div><strong>'+cname+'</strong></div>';
+    var td1=mkEl('td','',fmtDS(r.fecha)); td1.style.whiteSpace='nowrap';
+    var td2=mkEl('td'); td2.innerHTML='<span class="badge bg">'+fmtH(r.startH)+' – '+fmtH(r.endH)+'</span>';
+    var td3=mkEl('td','',r.userName); td3.style.fontSize='12px';
+    var td4=mkEl('td');
+    if(isOwn) td4.innerHTML='<span class="badge bme">Yo</span>';
+    else if(isAdm)(function(rid){td4.appendChild(mkBtn('btn btn-danger btn-sm','✕',function(){adminCancelRes(rid);}));})(String(r.id));
+    [td0,td1,td2,td3,td4].forEach(function(td){tr2.appendChild(td);});
+    tbody.appendChild(tr2);
+  }
+  var wrap=mkEl('div','agenda-scroll');
+  var tbl=mkEl('table','atable');
+  tbl.innerHTML='<thead><tr><th>Consultorio</th><th>Fecha</th><th>Horario</th><th>Profesional</th><th></th></tr></thead>';
+  tbl.appendChild(tbody); wrap.appendChild(tbl); cnt.appendChild(wrap);
+}
+function adminCancelRes(rid){
+  if(!confirm('¿Cancelar esta reserva?')) return;
+  api({action:'adminCancelReservation',adminId:CU.id,id:rid},function(err,res){
+    if(err||!res.ok){showToast(res&&res.error||'Error','err');return;}
+    loadRR(function(){renderAgenda();}); showToast('Reserva eliminada','ok');
+  });
+}
+
+// --- DIRECTORIO ---
+function loadDir(){
+  G('dirContent').innerHTML='<div class="loader"><div class="spinner"></div><p>Cargando...</p></div>';
+  api({action:'getUsers'},function(err,res){
+    if(err||!res.ok){G('dirContent').innerHTML='<div class="empty"><div class="ei">⚠️</div><h3>Error al cargar</h3></div>';return;}
+    AU=res.users||[]; renderDir();
+  });
+}
+function renderDir(){
+  var cnt=G('dirContent'); cnt.innerHTML='';
+  cnt.appendChild(mkEl('div','sec-title','Equipo'));
+  if(!AU.length){var e=mkEl('div','empty');e.innerHTML='<div class="ei">👥</div><h3>Sin usuarios</h3>';cnt.appendChild(e);return;}
+  for(var i=0;i<AU.length;i++){
+    var u=AU[i];
+    var card=mkEl('div','udc');
+    var top=mkEl('div','udc-top');
+    top.appendChild(mkAv(u.nombre,u.foto,52));
+    var info=mkEl('div','udc-info');
+    info.innerHTML='<div class="udc-name">'+u.nombre+' <span class="rol-badge rol-'+u.rol+'">'+u.rol+'</span></div><div class="udc-email">'+u.email+'</div>';
+    top.appendChild(info); card.appendChild(top);
+    var acts=mkEl('div','udc-actions');
+    if(u.telefono){
+      var aCall=mkEl('a','btn btn-call btn-sm','📞 Llamar'); aCall.href='tel:'+u.telefono; acts.appendChild(aCall);
+      var aWA=mkEl('a','btn btn-call btn-sm','💬 WA'); aWA.href='https://wa.me/'+u.telefono.replace(/\D/g,''); aWA.target='_blank'; acts.appendChild(aWA);
+    }
+    var aMail=mkEl('a','btn btn-mail btn-sm','✉ Email'); aMail.href='mailto:'+u.email; acts.appendChild(aMail);
+    card.appendChild(acts); cnt.appendChild(card);
+  }
+}
+
+// --- PERFIL ---
+function renderPerfil(){
+  var cnt=G('perfilContent'); cnt.innerHTML='';
+  var hero=mkEl('div','profile-hero');
+  var avDiv=mkEl('div','profile-av');
+  if(CU.foto){var img=mkEl('img');img.src=CU.foto;avDiv.appendChild(img);}
+  else{avDiv.style.background=avatarColor(CU.nombre);avDiv.textContent=ini(CU.nombre);}
+  avDiv.appendChild(mkEl('div','profile-av-badge','📷'));
+  var fin=mkEl('input'); fin.type='file'; fin.accept='image/*'; fin.style.display='none';
+  fin.addEventListener('change',function(){handlePhoto('profile',this);});
+  avDiv.appendChild(fin); avDiv.addEventListener('click',function(){fin.click();});
+  hero.appendChild(avDiv);
+  hero.appendChild(mkEl('div','profile-name',CU.nombre));
+  hero.appendChild(mkEl('div','profile-email',CU.email));
+  cnt.appendChild(hero);
+  var card=mkEl('div','card');
+  card.innerHTML='<div class="ch"><div><h3>Mis datos</h3></div></div><div class="cb" id="perfil-cb"><div class="field"><label>Nombre</label><input type="text" id="p-name" value="'+CU.nombre+'"></div><div class="field"><label>Teléfono</label><input type="tel" id="p-phone" value="'+(CU.telefono||'')+'"></div><div class="field"><label>Nueva contraseña (vacío = no cambiar)</label><input type="password" id="p-pw" placeholder="••••••••"></div><div id="p-msg"></div></div>';
+  cnt.appendChild(card);
+  G('perfil-cb').appendChild(mkBtn('btn btn-primary btn-full','Guardar cambios',savePerfil));
+  cnt.appendChild(mkBtn('btn btn-danger btn-full','✕ Cerrar sesión',function(){
+    if(confirm('¿Cerrar sesión?')) doLogout();
+  }));
+  cnt.lastChild.style.marginTop='8px';
+}
+function savePerfil(){
+  var name=G('p-name').value.trim(), phone=G('p-phone').value.trim(), pw=G('p-pw').value;
+  if(!name){setMsg('p-msg','El nombre es obligatorio','err');return;}
+  if(pw&&pw.length<6){setMsg('p-msg','Contraseña mínimo 6 caracteres','err');return;}
+  setMsg('p-msg','Guardando...','');
+  var p={action:'updateProfile',userId:CU.id,nombre:name,telefono:phone}; if(pw)p.password=pw;
+  api(p,function(err,res){
+    if(err||!res.ok){setMsg('p-msg',res&&res.error||err,'err');return;}
+    CU=res.user; saveLocal(); updateChip(); setMsg('p-msg','✓ Perfil actualizado','ok'); renderPerfil();
+  });
+}
+
+// --- ADMIN ---
+function loadAdmin(){
+  if(CU.rol!=='admin') return;
+  G('adminContent').innerHTML='<div class="loader"><div class="spinner"></div><p>Cargando...</p></div>';
+  api({action:'getUsers',adminId:CU.id},function(err,res){
+    if(err||!res.ok){G('adminContent').innerHTML='<div class="empty"><div class="ei">⚠️</div><h3>Error</h3></div>';return;}
+    AU=res.users||[]; renderAdm();
+  });
+}
+function renderAdm(){
+  var cnt=G('adminContent'); cnt.innerHTML='';
+  cnt.appendChild(mkEl('div','sec-title','Usuarios'));
+  for(var i=0;i<AU.length;i++){
+    var u=AU[i], isSelf=u.id===CU.id;
+    var card=mkEl('div','admin-card');
+    var av=mkEl('div','admin-av',isSelf?'':undefined);
+    if(u.foto){var img=mkEl('img');img.src=u.foto;av.appendChild(img);}
+    else{av.style.cssText='width:42px;height:42px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;background:'+avatarColor(u.nombre);av.textContent=ini(u.nombre);}
+    card.appendChild(av);
+    var info=mkEl('div','admin-info');
+    info.innerHTML='<div class="admin-name">'+u.nombre+' <span class="rol-badge rol-'+u.rol+'">'+u.rol+'</span>'+(isSelf?' <span style="font-size:11px;color:var(--ink3)">(vos)</span>':'')+'</div><div class="admin-meta">'+u.email+(u.telefono?' · '+u.telefono:'')+'</div>';
+    card.appendChild(info);
+    var acts=mkEl('div','admin-actions');
+    (function(uid){acts.appendChild(mkBtn('btn btn-ghost btn-sm','✎',function(){openEditUser(uid);}));})(u.id);
+    if(!isSelf)(function(uid){acts.appendChild(mkBtn('btn btn-danger btn-sm','✕',function(){deleteUsr(uid);}));})(u.id);
+    card.appendChild(acts); cnt.appendChild(card);
+  }
+  cnt.appendChild(mkEl('div','divider'));
+  cnt.appendChild(mkEl('div','sec-title','Consultorios'));
+  for(var i=0;i<CONSULTORIOS.length;i++){
+    var c=CONSULTORIOS[i];
+    var ccard=mkEl('div','cac');
+    var cimg=mkEl('div','cac-img');
+    if(c.foto){var ci=mkEl('img');ci.src=c.foto;cimg.appendChild(ci);}
+    else cimg.textContent='🏥';
+    ccard.appendChild(cimg);
+    var cbody=mkEl('div','cac-body');
+    var cname=mkEl('div','cac-name'); var cdot=mkEl('div','cac-dot'); cdot.style.background=c.color; cname.appendChild(cdot); cname.appendChild(document.createTextNode(c.name));
+    cbody.appendChild(cname);
+    (function(cid){cbody.appendChild(mkBtn('btn btn-ghost btn-sm','✎ Editar',function(){openEditConsul(cid);}));})(c.id);
+    ccard.appendChild(cbody); cnt.appendChild(ccard);
+  }
+}
+function openEditUser(uid){
+  var u=byId(AU,uid); if(!u)return;
+  G('eu-id').value=u.id; G('eu-name').value=u.nombre; G('eu-email').value=u.email;
+  G('eu-phone').value=u.telefono||''; G('eu-rol').value=u.rol; G('eu-pw').value=''; G('eu-msg').innerHTML='';
+  G('modalEditUser').style.display='flex';
+}
+function saveEditUser(){
+  var id=G('eu-id').value,nombre=G('eu-name').value.trim(),email=G('eu-email').value.trim(),phone=G('eu-phone').value.trim(),rol=G('eu-rol').value,pw=G('eu-pw').value;
+  if(!nombre||!email){setMsg('eu-msg','Nombre y email obligatorios','err');return;}
+  setMsg('eu-msg','Guardando...','');
+  var p={action:'updateUser',adminId:CU.id,id:id,nombre:nombre,email:email,rol:rol,telefono:phone}; if(pw)p.password=pw;
+  api(p,function(err,res){
+    if(err||!res.ok){setMsg('eu-msg',res&&res.error||err,'err');return;}
+    closeModal('modalEditUser'); showToast('Usuario actualizado','ok'); loadAdmin();
+  });
+}
+function deleteUsr(uid){
+  if(!confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')) return;
+  api({action:'deleteUser',adminId:CU.id,id:uid},function(err,res){
+    if(err||!res.ok){showToast(res&&res.error||'Error','err');return;}
+    showToast('Usuario eliminado','ok'); loadAdmin();
+  });
+}
+function openEditConsul(cid){
+  var c=byId(CONSULTORIOS,cid); if(!c)return;
+  G('ec-id').value=c.id; G('ec-name').value=c.name; G('ec-desc').value=c.descripcion||'';
+  photEc=c.foto||'';
+  var circle=G('ecPhotoCircle');
+  if(c.foto){circle.style.backgroundImage='url('+c.foto+')';G('ecPhotoIco').style.display='none';}
+  else{circle.style.backgroundImage='none';G('ecPhotoIco').style.display='';}
+  G('ec-msg').innerHTML=''; G('modalEditConsul').style.display='flex';
+}
+function saveEditConsul(){
+  var id=G('ec-id').value,nombre=G('ec-name').value.trim(),desc=G('ec-desc').value.trim();
+  if(!nombre){setMsg('ec-msg','El nombre no puede estar vacío','err');return;}
+  setMsg('ec-msg','Guardando...','');
+  api({action:'updateConsultorio',adminId:CU.id,id:id,nombre:nombre,descripcion:desc,foto:photEc},function(err,res){
+    if(err||!res.ok){setMsg('ec-msg',res&&res.error||err,'err');return;}
+    closeModal('modalEditConsul'); showToast('Consultorio actualizado','ok'); loadRR(function(){loadAdmin();});
+  });
+}
+
+// ================================================================
+//  WIRE UP — conectar todos los event listeners estáticos
+// ================================================================
+
+// Auth
+G('btn-login').addEventListener('click', doLogin);
+G('btn-register').addEventListener('click', doRegister);
+G('l-email').addEventListener('keydown',   function(e){if(e.key==='Enter')doLogin();});
+G('l-pw').addEventListener('keydown',      function(e){if(e.key==='Enter')doLogin();});
+G('r-pw').addEventListener('keydown',      function(e){if(e.key==='Enter')doRegister();});
+G('regPhotoCircle').addEventListener('click', function(){G('reg-photo-input').click();});
+G('reg-photo-input').addEventListener('change', function(){handlePhoto('reg',this);});
+G('ec-photo-input').addEventListener('change',  function(){handlePhoto('ec',this);});
+
+// Navigation
+G('userChip').addEventListener('click', function(){
+  G('mLogoutName').textContent=CU.nombre; G('mLogoutEmail').textContent=CU.email;
+  G('modalLogout').style.display='flex';
+});
+G('btnDoLogout').addEventListener('click', doLogout);
+G('btnGoPerfil').addEventListener('click', function(){closeModal('modalLogout');showPage('perfil');});
+G('modalLogout').addEventListener('click', function(e){if(e.target===this)closeModal('modalLogout');});
+
+// Bottom nav
+document.querySelectorAll('.nav-item[data-page]').forEach(function(btn){
+  btn.addEventListener('click', function(){ showPage(this.getAttribute('data-page')); });
+});
+
+// Stepper
+G('calPrevBtn').addEventListener('click', function(){CM--;if(CM<0){CM=11;CY--;}renderCalendar();});
+G('calNextBtn').addEventListener('click', function(){CM++;if(CM>11){CM=0;CY++;}renderCalendar();});
+G('s2back').addEventListener('click', function(){goStep(1);});
+G('s3back').addEventListener('click', function(){goStep(2);});
+G('cancelConfirmBtn').addEventListener('click', resetAll);
+G('confirmBtn').addEventListener('click', confirmBooking);
+
+// Agenda filters
+G('fC').addEventListener('change', renderAgenda);
+G('fD').addEventListener('change', renderAgenda);
+
+// Modals
+G('btnCancelEditUser').addEventListener('click',   function(){closeModal('modalEditUser');});
+G('btnSaveEditUser').addEventListener('click',     saveEditUser);
+G('modalEditUser').addEventListener('click',       function(e){if(e.target===this)closeModal('modalEditUser');});
+G('btnCancelEditConsul').addEventListener('click', function(){closeModal('modalEditConsul');});
+G('btnSaveEditConsul').addEventListener('click',   saveEditConsul);
+G('modalEditConsul').addEventListener('click',     function(e){if(e.target===this)closeModal('modalEditConsul');});
+
+// Offline
+window.addEventListener('online',  function(){G('offlineBar').style.display='none';});
+window.addEventListener('offline', function(){G('offlineBar').style.display='block';});
+
+// Unregister old broken service workers, then register fresh
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.getRegistrations().then(function(regs){
+    regs.forEach(function(r){ r.unregister(); });
+  }).then(function(){
+    navigator.serviceWorker.register('./sw.js').catch(function(){});
+  }).catch(function(){
+    navigator.serviceWorker.register('./sw.js').catch(function(){});
+  });
+}
+
+// ================================================================
+//  AUTO LOGIN — al final, después de que todo está inicializado
+// ================================================================
+(function(){
+  try{
+    var s=localStorage.getItem('im_user');
+    if(s){var u=JSON.parse(s); if(u&&u.id&&u.nombre){startSession(u);return;}}
+  }catch(e){}
+})();
+
+}); // end DOMContentLoaded
+</script>
+
+</body>
+</html>

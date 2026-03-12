@@ -1,0 +1,24 @@
+{
+  "name": "Integra Más – Consultorios",
+  "short_name": "Integra Más",
+  "description": "Sistema de reserva de consultorios",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fdf6f0",
+  "theme_color": "#c25a00",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='38' fill='%23c25a00'/%3E%3Crect x='30' y='38' width='95' height='120' rx='14' fill='%23fdb57a'/%3E%3Crect x='67' y='18' width='95' height='120' rx='14' fill='rgba(255,255,255,0.28)' stroke='rgba(255,255,255,0.65)' stroke-width='5'/%3E%3Cline x1='87' y1='58' x2='145' y2='58' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3Cline x1='87' y1='82' x2='145' y2='82' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3Cline x1='87' y1='106' x2='120' y2='106' stroke='white' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23c25a00'/%3E%3Crect x='80' y='100' width='255' height='320' rx='36' fill='%23fdb57a'/%3E%3Crect x='177' y='48' width='255' height='320' rx='36' fill='rgba(255,255,255,0.28)' stroke='rgba(255,255,255,0.65)' stroke-width='12'/%3E%3Cline x1='227' y1='150' x2='390' y2='150' stroke='white' stroke-width='22' stroke-linecap='round'/%3E%3Cline x1='227' y1='218' x2='390' y2='218' stroke='white' stroke-width='22' stroke-linecap='round'/%3E%3Cline x1='227' y1='286' x2='320' y2='286' stroke='white' stroke-width='22' stroke-linecap='round'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
