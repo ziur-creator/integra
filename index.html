@@ -511,7 +511,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbyKEK7lC-5MmPcGswuH3GtGIEovShA4DJF6l9W2Wqv0ZagMtYUfF7Gr3zjLTYF4Ebo/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbzzDAauuuNQWT8o7_281DkJxX2qPfZrymuaczzDstlcTzWv862MkkDyNxy12K0kn9zD/exec';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -613,17 +613,24 @@ function isDemo(){return !API_URL||API_URL.indexOf('TU_URL')!==-1||API_URL.lengt
 function api(p,cb){
   if(isDemo()){apiDemo(p,cb);return;}
   var x=new XMLHttpRequest();
-  var hasLargeData = p.foto !== undefined;
-  if(hasLargeData){
+  // Usar POST solo si la foto existe y es grande (base64 largo rompe GET)
+  // Apps Script tiene restricciones CORS con POST, así que preferimos GET siempre que sea posible
+  var fotoVal = p.foto !== undefined ? String(p.foto) : '';
+  var needsPost = fotoVal.length > 1000; // solo si hay foto real
+  if(needsPost){
+    // Para POST con foto: Apps Script requiere redirect follow
     x.open('POST',API_URL,true); x.timeout=25000;
-    x.setRequestHeader('Content-Type','application/json');
+    x.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
     x.onload=function(){try{cb(null,JSON.parse(x.responseText));}catch(e){cb(null,{ok:false,error:'Error del servidor'});}};
     x.onerror=function(){cb(null,{ok:false,error:'Sin conexión'});};
     x.ontimeout=function(){cb(null,{ok:false,error:'Tiempo agotado'});};
-    x.send(JSON.stringify(p));
-  } else {
     var qs=Object.keys(p).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(String(p[k]));}).join('&');
-    x.open('GET',API_URL+'?'+qs,true); x.timeout=12000;
+    x.send(qs);
+  } else {
+    var p2={};
+    for(var k in p) if(p[k]!==undefined&&p[k]!=='') p2[k]=p[k];
+    var qs=Object.keys(p2).map(function(k){return encodeURIComponent(k)+'='+encodeURIComponent(String(p2[k]));}).join('&');
+    x.open('GET',API_URL+'?'+qs,true); x.timeout=15000;
     x.onload=function(){try{cb(null,JSON.parse(x.responseText));}catch(e){cb(null,{ok:false,error:'Error del servidor'});}};
     x.onerror=function(){cb(null,{ok:false,error:'Sin conexión'});};
     x.ontimeout=function(){cb(null,{ok:false,error:'Tiempo agotado'});};
@@ -740,7 +747,9 @@ function doRegister(){
   if(!name||!email||!pw){setMsg('r-msg','Nombre, email y contraseña son obligatorios','err');return;}
   if(pw.length<6){setMsg('r-msg','La contraseña debe tener al menos 6 caracteres','err');return;}
   setMsg('r-msg','Creando cuenta...','');
-  api({action:'register',nombre:name,email:email,password:pw,telefono:phone,foto:photoReg},function(err,res){
+  var regData={action:'register',nombre:name,email:email,password:pw,telefono:phone};
+  if(photoReg) regData.foto=photoReg;
+  api(regData,function(err,res){
     if(err||!res.ok){setMsg('r-msg',res&&res.error||'Error','err');return;}
     setMsg('r-msg','✓ Cuenta creada!','ok');
     setTimeout(function(){photoReg='';startSession(res.user);},700);
