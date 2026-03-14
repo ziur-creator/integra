@@ -378,14 +378,14 @@ input[type=file]{
       <button class="atab" id="tab-reg" onclick="switchAuth('reg')">Registrarse</button>
     </div>
     <div id="form-login">
-      <form onsubmit="doLogin();return false;" action="javascript:void(0)">
-        <div class="fld"><label>Email</label><input type="email" id="l-email" name="email" placeholder="tu@email.com" autocomplete="username" inputmode="email"></div>
-        <div class="fld"><label>Contraseña</label><input type="password" id="l-pw" name="password" placeholder="••••••••" autocomplete="current-password"></div>
+      <form id="login-form" onsubmit="doLogin();return false;">
+        <div class="fld"><label>Email</label><input type="email" id="l-email" name="username" placeholder="tu@email.com" autocomplete="username" inputmode="email"></div>
+        <div class="fld"><label>Contraseña</label><input type="password" id="l-pw" name="current-password" placeholder="••••••••" autocomplete="current-password"></div>
         <div id="l-msg"></div>
         <button type="submit" class="abtn">Ingresar</button>
       </form>
       <div style="text-align:center;margin-top:12px">
-        <button onclick="openRecovery()" style="background:none;border:none;color:var(--acc);font-size:13px;cursor:pointer;text-decoration:underline;padding:0">¿Olvidaste tu contraseña?</button>
+        <button type="button" onclick="openRecovery()" style="background:none;border:none;color:var(--acc);font-size:13px;cursor:pointer;text-decoration:underline;padding:0">¿Olvidaste tu contraseña?</button>
       </div>
     </div>
     <div id="form-reg" style="display:none">
@@ -614,7 +614,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbzexX3TSxriuTdMdWqrAtzGEIsJs42nGXw_K-e9MhAC6hjyxe5zLHQc9fyMKClHpF_y/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -924,8 +924,8 @@ function switchAuth(tab){
   setMsg('l-msg','');setMsg('r-msg','');
 }
 function doLogin(){
-  // setTimeout(0) — deja que iOS termine de rellenar los campos antes de leerlos
-  setTimeout(function(){
+  // iOS rellena campos de autocompletado de forma asíncrona — esperar que termine
+  function tryLogin(){
     var email=(G('l-email').value||'').trim(),pw=G('l-pw').value||'';
     if(!email||!pw){setMsg('l-msg','Completá email y contraseña','err');return;}
     setMsg('l-msg','Ingresando...','');
@@ -940,7 +940,15 @@ function doLogin(){
       }
       startSession(res.user);
     });
-  },80);
+  }
+  // Primer intento inmediato — si pw vacío, esperar 300ms y reintentar
+  var pwVal = G('l-pw').value||'';
+  if(pwVal){
+    tryLogin();
+  } else {
+    setMsg('l-msg','','');
+    setTimeout(tryLogin, 300);
+  }
 }
 
 /* VERIFICACION EMAIL */
@@ -1073,7 +1081,7 @@ function showPage(name){
 
 /* DATOS */
 function loadRR(cb){
-  api({action:'getReservations'},function(err,res){
+  apiPost({action:'getReservations'},function(err,res){
     if(err||!res.ok){if(cb)cb();return;}
     RR=(res.reservations||[]).map(function(r){return{id:String(r.id),consulId:String(r.consulId),fecha:String(r.fecha),startH:parseInt(r.startH),endH:parseInt(r.endH),userId:String(r.userId),userName:r.userName||''};});
     if(res.consultorios&&res.consultorios.length)CS=res.consultorios.map(function(c){return{id:String(c.id),name:c.nombre||c.name,color:c.color||'#c25a00',foto:c.foto||'',descripcion:c.descripcion||''};});
