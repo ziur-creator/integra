@@ -614,7 +614,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbyaAwFCz9Cd-aAI0r8rD-JOdlUTmLjnw5o01xVKBLMEOnqif2xgWPtS_autBEphTjkt/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -677,7 +677,7 @@ function handlePhoto(ctx,input){
       // Tamaño máximo según contexto
       // Avatar: 200px cuadrado centrado (crop circular visual)
       // Consultorio: 600px ancho
-      var maxSize = (ctx==='ec') ? 600 : 280;
+      var maxSize = (ctx==='ec') ? 400 : 280;
       var w=img.width, h=img.height;
       var canvas=document.createElement('canvas');
       if(ctx!=='ec'){
@@ -693,11 +693,11 @@ function handlePhoto(ctx,input){
         var ctx2=canvas.getContext('2d');
         ctx2.drawImage(img,0,0,w,h);
       }
-      // Para perfil/registro usar POST → más margen de tamaño
-      // Avatar: ~60KB base64 max | Consultorio: ~120KB max
-      var maxLen = (ctx==='ec') ? 160000 : 80000;
-      var quality=0.82, data=canvas.toDataURL('image/jpeg',quality);
-      while(data.length>maxLen&&quality>0.15){ quality-=0.05; data=canvas.toDataURL('image/jpeg',quality); }
+      // Sheets tiene límite de 50k chars por celda — la base64 no puede superar ~36k chars
+      // Para consultorio: máx 34000 chars. Para perfil: máx 34000 chars.
+      var maxLen = 34000;
+      var quality=0.7, data=canvas.toDataURL('image/jpeg',quality);
+      while(data.length>maxLen&&quality>0.1){ quality-=0.08; data=canvas.toDataURL('image/jpeg',quality); }
       applyPhoto(ctx,data);
     };
     img.onerror=function(){showToast('No se pudo leer la imagen','err');};
@@ -1525,7 +1525,12 @@ function saveEditConsul(){
   setMsg('ec-msg','Guardando...','');
   apiPost({action:'updateConsultorio',adminId:CU.id,id:id,nombre:nombre,descripcion:desc,foto:photoEc},function(err,res){
     if(err||!res.ok){setMsg('ec-msg',res&&res.error||'Error','err');return;}
-    closeModal('modal-ec');showToast('Consultorio actualizado','ok');loadRR(loadAdmin);
+    // Actualizar CS local inmediatamente
+    var c=byId(CS,id);
+    if(c){c.name=nombre;c.descripcion=desc;if(res.foto!==undefined)c.foto=res.foto;else if(photoEc)c.foto=photoEc;}
+    // En modo demo, actualizar también apiDemo CS
+    if(isDemo()){var cd=byId(CS,id);if(cd){cd.name=nombre;cd.descripcion=desc;cd.foto=photoEc;}}
+    closeModal('modal-ec');showToast('✓ Consultorio actualizado','ok');loadRR(loadAdmin);
   });
 }
 
