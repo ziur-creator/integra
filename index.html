@@ -968,11 +968,13 @@ function startSession(user) {
   G('nav-admin').style.display = (user.rol === 'admin') ? 'flex' : 'none';
  
   // Cargar datos iniciales
-  loadBlocked();
-  initDR();
+ 
   loadRR(function() {
+
     renderCal();
     updateStepper();
+    loadBlocked();
+    initDR();
  });
  
   showPage('reservar');
