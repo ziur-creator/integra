@@ -278,7 +278,10 @@ input[type=file]{
 .ahora-dot.proximo{background:var(--acc2)}
 .ahora-legend{display:flex;gap:12px;flex-wrap:wrap;background:var(--surf);border-radius:10px;padding:10px 14px;margin-bottom:14px;box-shadow:0 2px 16px rgba(80,40,10,.08)}
 .ahora-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2)}
-/* AVISOS */
+/* AVISOS BADGE */
+.logo{position:relative}
+.avisos-dot{position:absolute;top:2px;right:-4px;width:8px;height:8px;border-radius:50%;background:#ffd4b8;border:1.5px solid var(--acc);display:none}
+.avisos-dot.show{display:block;animation:pulse 2s ease-in-out infinite}
 .aviso-card{background:var(--surf);border-radius:var(--r);box-shadow:0 2px 16px rgba(80,40,10,.10);overflow:hidden;margin-bottom:12px;border-left:4px solid var(--acc)}
 .aviso-card.urgente{border-left-color:var(--red)}
 .aviso-card.info{border-left-color:#2980b9}
@@ -429,7 +432,7 @@ input[type=file]{
   <path d="M53,37 L53,10 A27,27 0 0 1 80,37 Z" fill="rgba(255,255,255,0.45)"/>
   <path d="M19,81 L19,94 A13,13 0 0 1 6,81 Z" fill="rgba(255,255,255,0.45)"/>
   <path d="M53,62 L77,62 A24,24 0 0 1 53,86 Z" fill="rgba(255,255,255,0.45)"/>
-</svg><span>INTEGRA <em>MÁS</em></span></div>
+</svg><span>INTEGRA <em>MÁS</em></span><span class="avisos-dot" id="avisos-dot"></span></div>
     <button class="chip" onclick="openLogout()">
       <div class="chip-av" id="chip-av"></div>
       <span class="chip-name" id="chip-name"></span>
@@ -609,7 +612,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycby9CFE4vwmJGBbg1RdS9zMEaXyk_CbAwjaBhFTxjA4MwnxGFvKmgvhDJOEEhhzH63K-/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -620,13 +623,13 @@ var photoReg='',photoEc='';
 var MONTHS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 var DOWS=['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
 var DU=[
-  {id:'u0',nombre:'Administrador',email:'admin@integra.com',pw:hw('admin123'),rol:'admin',tel:'',foto:''},
-  {id:'u1',nombre:'Dr. García',email:'garcia@demo.com',pw:hw('123456'),rol:'user',tel:'+5491111111111',foto:''},
-  {id:'u2',nombre:'Dra. Martínez',email:'martinez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491122222222',foto:''},
-  {id:'u3',nombre:'Dr. Rodríguez',email:'rodriguez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491133333333',foto:''},
-  {id:'u4',nombre:'Dra. López',email:'lopez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491144444444',foto:''},
-  {id:'u5',nombre:'Dr. Fernández',email:'fernandez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491155555555',foto:''},
-  {id:'u6',nombre:'Dra. Sánchez',email:'sanchez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491166666666',foto:''}
+  {id:'u0',nombre:'Administrador',email:'admin@integra.com',pw:hw('admin123'),rol:'admin',tel:'',foto:'',verified:true},
+  {id:'u1',nombre:'Dr. García',email:'garcia@demo.com',pw:hw('123456'),rol:'user',tel:'+5491111111111',foto:'',verified:true},
+  {id:'u2',nombre:'Dra. Martínez',email:'martinez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491122222222',foto:'',verified:true},
+  {id:'u3',nombre:'Dr. Rodríguez',email:'rodriguez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491133333333',foto:'',verified:true},
+  {id:'u4',nombre:'Dra. López',email:'lopez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491144444444',foto:'',verified:true},
+  {id:'u5',nombre:'Dr. Fernández',email:'fernandez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491155555555',foto:'',verified:true},
+  {id:'u6',nombre:'Dra. Sánchez',email:'sanchez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491166666666',foto:'',verified:true}
 ];
 var DR=[];
 
@@ -1023,6 +1026,13 @@ function startSession(user){
   loadBlocked();
   initDR();
   loadRR(function(){renderCal();updateStepper();});
+  // Mostrar dot de avisos si hay avisos nuevos no vistos
+  try{
+    var seen=parseInt(localStorage.getItem('im_avisos_seen')||'0');
+    if(AVISOS.length>0 && seen<AVISOS.length){
+      var dot=G('avisos-dot');if(dot)dot.className='avisos-dot show';
+    }
+  }catch(e){}
   showPage('reservar');
 }
 function saveLocal(){try{localStorage.setItem('im_user',JSON.stringify(CU));}catch(e){}}
@@ -2044,6 +2054,9 @@ var AVISOS = [
 
 function renderAvisos(){
   var pg=G('page-avisos');pg.innerHTML='';
+  // Marcar avisos como vistos
+  try{localStorage.setItem('im_avisos_seen', AVISOS.length);}catch(e){}
+  var dot=G('avisos-dot');if(dot)dot.className='avisos-dot';
   // Hero header
   var hero=mkEl('div');
   hero.style.cssText='background:var(--acc);margin:-14px -14px 16px;padding:22px 18px 18px;';
