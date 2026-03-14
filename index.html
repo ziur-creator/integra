@@ -280,7 +280,7 @@ input[type=file]{
 .ahora-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2)}
 /* AVISOS BADGE */
 .logo{position:relative}
-.avisos-dot{position:absolute;top:2px;right:-4px;width:8px;height:8px;border-radius:50%;background:#ffd4b8;border:1.5px solid var(--acc);display:none}
+.avisos-dot{position:absolute;top:-1px;right:-10px;width:11px;height:11px;border-radius:50%;background:#ffd4b8;border:2px solid var(--acc);display:none}
 .avisos-dot.show{display:block;animation:pulse 2s ease-in-out infinite}
 .aviso-card{background:var(--surf);border-radius:var(--r);box-shadow:0 2px 16px rgba(80,40,10,.10);overflow:hidden;margin-bottom:12px;border-left:4px solid var(--acc)}
 .aviso-card.urgente{border-left-color:var(--red)}
@@ -612,7 +612,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycby9CFE4vwmJGBbg1RdS9zMEaXyk_CbAwjaBhFTxjA4MwnxGFvKmgvhDJOEEhhzH63K-/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -809,10 +809,10 @@ function apiDemo(p,cb){
     if(p.action==='register'){
       var em=(p.email||'').toLowerCase().trim();
       for(i=0;i<DU.length;i++)if(DU[i].email===em)return cb(null,{ok:false,error:'El email ya está registrado'});
-      var nu={id:'u'+Date.now(),nombre:p.nombre,email:em,pw:hw(p.password),rol:'user',tel:p.telefono||'',foto:p.foto||'',verified:false};
+      var nu={id:'u'+Date.now(),nombre:p.nombre,email:em,pw:hw(p.password),rol:'user',tel:p.telefono||'',foto:p.foto||'',verified:true};
       DU.push(nu);
-      // Demo: código fijo 123456 para facilitar prueba
-      return cb(null,{ok:true, pendingVerification:true, email:em, _demoCode:'123456'});
+      // Demo: cuenta activada directamente, sin verificación
+      return cb(null,{ok:true, pendingVerification:false, user:uSafe(nu)});
     }
     if(p.action==='getReservations'){
       return cb(null,{ok:true,reservations:JSON.parse(JSON.stringify(DR)),consultorios:CS.map(function(c){return{id:c.id,nombre:c.name,color:c.color,foto:c.foto,descripcion:c.descripcion};})});
