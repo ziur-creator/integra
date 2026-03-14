@@ -279,8 +279,7 @@ input[type=file]{
 .ahora-legend{display:flex;gap:12px;flex-wrap:wrap;background:var(--surf);border-radius:10px;padding:10px 14px;margin-bottom:14px;box-shadow:0 2px 16px rgba(80,40,10,.08)}
 .ahora-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2)}
 /* AVISOS BADGE */
-.logo{position:relative}
-.avisos-dot{position:absolute;bottom:2px;right:-12px;width:11px;height:11px;border-radius:50%;background:#ffd4b8;border:2px solid var(--acc);display:none}
+.avisos-dot{position:absolute;top:50%;transform:translateY(-50%);right:-13px;width:9px;height:9px;border-radius:50%;background:var(--red);border:1.5px solid rgba(255,255,255,0.7);display:none}
 .avisos-dot.show{display:block;animation:pulse 2s ease-in-out infinite}
 .aviso-card{background:var(--surf);border-radius:var(--r);box-shadow:0 2px 16px rgba(80,40,10,.10);overflow:hidden;margin-bottom:12px;border-left:4px solid var(--acc)}
 .aviso-card.urgente{border-left-color:var(--red)}
@@ -379,10 +378,12 @@ input[type=file]{
       <button class="atab" id="tab-reg" onclick="switchAuth('reg')">Registrarse</button>
     </div>
     <div id="form-login">
-      <div class="fld"><label>Email</label><input type="email" id="l-email" placeholder="tu@email.com" autocomplete="email" inputmode="email"></div>
-      <div class="fld"><label>Contraseña</label><input type="password" id="l-pw" placeholder="••••••••" autocomplete="current-password"></div>
-      <div id="l-msg"></div>
-      <button class="abtn" onclick="doLogin()">Ingresar</button>
+      <form onsubmit="doLogin();return false;" action="javascript:void(0)">
+        <div class="fld"><label>Email</label><input type="email" id="l-email" name="email" placeholder="tu@email.com" autocomplete="username" inputmode="email"></div>
+        <div class="fld"><label>Contraseña</label><input type="password" id="l-pw" name="password" placeholder="••••••••" autocomplete="current-password"></div>
+        <div id="l-msg"></div>
+        <button type="submit" class="abtn">Ingresar</button>
+      </form>
       <div style="text-align:center;margin-top:12px">
         <button onclick="openRecovery()" style="background:none;border:none;color:var(--acc);font-size:13px;cursor:pointer;text-decoration:underline;padding:0">¿Olvidaste tu contraseña?</button>
       </div>
@@ -432,7 +433,7 @@ input[type=file]{
   <path d="M53,37 L53,10 A27,27 0 0 1 80,37 Z" fill="rgba(255,255,255,0.45)"/>
   <path d="M19,81 L19,94 A13,13 0 0 1 6,81 Z" fill="rgba(255,255,255,0.45)"/>
   <path d="M53,62 L77,62 A24,24 0 0 1 53,86 Z" fill="rgba(255,255,255,0.45)"/>
-</svg><span>INTEGRA <em>MÁS</em></span><span class="avisos-dot" id="avisos-dot"></span></div>
+</svg><span style="position:relative">INTEGRA <em>MÁS</em><span class="avisos-dot" id="avisos-dot"></span></span></div>
     <button class="chip" onclick="openLogout()">
       <div class="chip-av" id="chip-av"></div>
       <span class="chip-name" id="chip-name"></span>
@@ -612,7 +613,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbx5GKoNWrCrd4iGLUX0jD5QQ4Wr-Bf7Qmzc-DIdIq2XLeVZetyQVG60100sVMbuE_X0/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
