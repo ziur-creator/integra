@@ -587,7 +587,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbw_kg5tMbRagM2YoPPmVre0Lq-VVnTFja7ViaWkP7Ye7h_8yFoDl283WrlnCOzH0VX-/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -1120,22 +1120,38 @@ function renderS2(){
 
 /* PASO 3 */
 function conflict(cid,fecha,s,e){var ci=String(cid);for(var i=0;i<RR.length;i++){var r=RR[i];if(r.consulId===ci&&r.fecha===fecha&&!(e<=r.startH||s>=r.endH))return r;}return null;}
+/* Chequea si el usuario ya tiene una reserva en ese horario (en cualquier consultorio) */
+function userConflict(uid,fecha,s,e){var su=String(uid);for(var i=0;i<RR.length;i++){var r=RR[i];if(r.userId===su&&r.fecha===fecha&&!(e<=r.startH||s>=r.endH))return r;}return null;}
 function renderS3(){
   G('s3-sub').textContent=fmtDateLong(selDate)+' · '+fmtH(selSS)+'–'+fmtH(selSE);
   G('cbar').style.display='none';
   var grid=G('consul-grid');grid.innerHTML='';
+  /* Conflicto del usuario en este horario (otro consultorio ya reservado) */
+  var uc=userConflict(CU.id,selDate,selSS,selSE);
   CS.forEach(function(c){
     var cf=conflict(c.id,selDate,selSS,selSE),isSel=selC&&selC.id===c.id;
-    var div=mkEl('div','cc'+(cf?' occ':' pick')+(isSel&&!cf?' sel':''));
-    div.appendChild(mkEl('span','cbadge '+(cf?'busy':'free'),cf?'Ocupado':'Libre'));
+    /* Si el usuario ya tiene reserva en este horario (en otro consultorio), bloquear todos */
+    var userBlocked = uc && (!cf || cf.userId!==CU.id); // hay conflicto de usuario pero no es este mismo consultorio
+    var isOcc = cf || userBlocked;
+    var div=mkEl('div','cc'+(isOcc?' occ':' pick')+(isSel&&!isOcc?' sel':''));
+    var badgeLabel = cf ? 'Ocupado' : (userBlocked ? 'Ya reservado' : 'Libre');
+    var badgeCls   = isOcc ? 'busy' : 'free';
+    div.appendChild(mkEl('span','cbadge '+badgeCls, badgeLabel));
     var imgDiv=mkEl('div','cc-img');
     if(c.foto){var img=mkEl('img');img.src=c.foto;imgDiv.appendChild(img);}
     else{var dot=mkEl('div','cdot');dot.style.background=c.color;imgDiv.appendChild(dot);}
     div.appendChild(imgDiv);
     div.appendChild(mkEl('div','cname',c.name));
-    div.appendChild(mkEl('div','cstat '+(cf?'busy':'free'),cf?fmtH(cf.startH)+'–'+fmtH(cf.endH):'Disponible'));
-    if(cf)div.appendChild(mkEl('div','cwho',cf.userName||'–'));
-    else(function(consul){div.onclick=function(){pickConsul(consul);};})(c);
+    if(cf){
+      div.appendChild(mkEl('div','cstat busy',fmtH(cf.startH)+'–'+fmtH(cf.endH)));
+      div.appendChild(mkEl('div','cwho',cf.userName||'–'));
+    } else if(userBlocked){
+      var ucConsul = byId(CS,uc.consulId);
+      div.appendChild(mkEl('div','cstat busy','Ya tenés '+(ucConsul?ucConsul.name:'otro consultorio')+' en este horario'));
+    } else {
+      div.appendChild(mkEl('div','cstat free','Disponible'));
+      (function(consul){div.onclick=function(){pickConsul(consul);};})(c);
+    }
     grid.appendChild(div);
   });
 }
@@ -1149,6 +1165,7 @@ function pickConsul(c){
 function confirmBooking(){
   if(!CU||!selC||selSS===null||selSE===null||!selDate)return;
   if(conflict(selC.id,selDate,selSS,selSE)){showToast('Conflicto: consultorio ocupado','err');renderS3();return;}
+  if(userConflict(CU.id,selDate,selSS,selSE)){showToast('Ya tenés una reserva en ese horario','err');renderS3();return;}
   var btn=G('confirm-btn');btn.textContent='Guardando...';btn.disabled=true;
   var savedName=selC.name;
   api({action:'addReservation',userId:CU.id,userName:CU.nombre,consulId:selC.id,fecha:selDate,startH:selSS,endH:selSE},function(err,res){
