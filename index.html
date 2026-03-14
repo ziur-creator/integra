@@ -279,7 +279,7 @@ input[type=file]{
 .ahora-legend{display:flex;gap:12px;flex-wrap:wrap;background:var(--surf);border-radius:10px;padding:10px 14px;margin-bottom:14px;box-shadow:0 2px 16px rgba(80,40,10,.08)}
 .ahora-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2)}
 /* AVISOS BADGE */
-.avisos-dot{position:absolute;top:50%;transform:translateY(-50%);right:-13px;width:9px;height:9px;border-radius:50%;background:var(--red);border:1.5px solid rgba(255,255,255,0.7);display:none}
+.avisos-dot{position:absolute;top:50%;transform:translateY(-50%);right:-13px;width:9px;height:9px;border-radius:50%;background:#ffd4b8;border:1.5px solid var(--acc);display:none}
 .avisos-dot.show{display:block;animation:pulse 2s ease-in-out infinite}
 .aviso-card{background:var(--surf);border-radius:var(--r);box-shadow:0 2px 16px rgba(80,40,10,.10);overflow:hidden;margin-bottom:12px;border-left:4px solid var(--acc)}
 .aviso-card.urgente{border-left-color:var(--red)}
@@ -613,7 +613,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbx1JtT0OLHQX8WdRRXzx0SdXRLoL8avNSw_OroMgEd6dnpz2KAL7M9oMMlXOAmN9-7m/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -918,20 +918,23 @@ function switchAuth(tab){
   setMsg('l-msg','');setMsg('r-msg','');
 }
 function doLogin(){
-  var email=(G('l-email').value||'').trim(),pw=G('l-pw').value||'';
-  if(!email||!pw){setMsg('l-msg','Completá email y contraseña','err');return;}
-  setMsg('l-msg','Ingresando...','');
-  api({action:'login',email:email,password:pw},function(err,res){
-    if(err||!res.ok){
-      if(res&&res.pendingVerification){
-        showVerifyStep(res.email||email, null);
-      } else {
-        setMsg('l-msg',res&&res.error||'Error','err');
+  // setTimeout(0) — deja que iOS termine de rellenar los campos antes de leerlos
+  setTimeout(function(){
+    var email=(G('l-email').value||'').trim(),pw=G('l-pw').value||'';
+    if(!email||!pw){setMsg('l-msg','Completá email y contraseña','err');return;}
+    setMsg('l-msg','Ingresando...','');
+    apiPost({action:'login',email:email,password:pw},function(err,res){
+      if(err||!res.ok){
+        if(res&&res.pendingVerification){
+          showVerifyStep(res.email||email, null);
+        } else {
+          setMsg('l-msg',res&&res.error||'Error','err');
+        }
+        return;
       }
-      return;
-    }
-    startSession(res.user);
-  });
+      startSession(res.user);
+    });
+  },80);
 }
 
 /* VERIFICACION EMAIL */
@@ -985,9 +988,7 @@ function doRegister(){
   if(!name||!email||!pw){setMsg('r-msg','Nombre, email y contraseña son obligatorios','err');return;}
   if(pw.length<6){setMsg('r-msg','La contraseña debe tener al menos 6 caracteres','err');return;}
   setMsg('r-msg','Creando cuenta...','');
-  // Registrar SIEMPRE sin foto (GET simple, sin problemas de CORS)
-  // Si hay foto, subirla en un segundo paso después del registro
-  api({action:'register',nombre:name,email:email,password:pw,telefono:phone},function(err,res){
+  apiPost({action:'register',nombre:name,email:email,password:pw,telefono:phone},function(err,res){
     if(err||!res.ok){setMsg('r-msg',res&&res.error||'Error','err');return;}
     // Registro exitoso — mostrar paso de verificación
     if(res.pendingVerification){
@@ -1365,9 +1366,11 @@ function loadEquipo(){
 }
 function renderEquipoList(cnt,users){
   cnt.innerHTML='';
-  cnt.appendChild(mkEl('div','sec-title','Equipo ('+users.length+')'));
-  if(!users.length){var e=mkEl('div','empty');e.innerHTML='<div class="ei">👥</div><h3>Sin usuarios</h3>';cnt.appendChild(e);return;}
-  users.forEach(function(u){
+  // Excluir al usuario activo de la lista
+  var others=users.filter(function(u){return String(u.id)!==String(CU.id);});
+  cnt.appendChild(mkEl('div','sec-title','Equipo ('+others.length+')'));
+  if(!others.length){var e=mkEl('div','empty');e.innerHTML='<div class="ei">👥</div><h3>Sin otros usuarios</h3>';cnt.appendChild(e);return;}
+  others.forEach(function(u){
     var card=mkEl('div','ucard');
     var top=mkEl('div','ucard-top');top.appendChild(mkAv(u.nombre,u.foto,50));
     var info=mkEl('div','ucard-info');
