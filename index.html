@@ -278,6 +278,20 @@ input[type=file]{
 .ahora-dot.proximo{background:var(--acc2)}
 .ahora-legend{display:flex;gap:12px;flex-wrap:wrap;background:var(--surf);border-radius:10px;padding:10px 14px;margin-bottom:14px;box-shadow:0 2px 16px rgba(80,40,10,.08)}
 .ahora-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2)}
+/* AVISOS */
+.aviso-card{background:var(--surf);border-radius:var(--r);box-shadow:0 2px 16px rgba(80,40,10,.10);overflow:hidden;margin-bottom:12px;border-left:4px solid var(--acc)}
+.aviso-card.urgente{border-left-color:var(--red)}
+.aviso-card.info{border-left-color:#2980b9}
+.aviso-card.ok{border-left-color:#27ae60}
+.aviso-head{padding:13px 16px 0;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.aviso-tag{font-family:'Josefin Sans',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:3px 8px;border-radius:20px;flex-shrink:0}
+.aviso-tag.urgente{background:var(--redL);color:var(--red)}
+.aviso-tag.info{background:#eaf4fd;color:#2980b9}
+.aviso-tag.ok{background:#d5f5e3;color:#1e8449}
+.aviso-tag.general{background:var(--accL);color:var(--acc)}
+.aviso-title{font-family:'Josefin Sans',sans-serif;font-size:14px;font-weight:700;letter-spacing:.3px;color:var(--ink);line-height:1.3}
+.aviso-body{padding:6px 16px 14px;font-size:13px;color:var(--ink2);line-height:1.6}
+.aviso-date{font-size:11px;color:var(--ink3);margin-top:6px}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 @keyframes spin{to{transform:rotate(360deg)}}
 
@@ -406,7 +420,7 @@ input[type=file]{
 
 <div id="app">
   <div class="topbar">
-    <div class="logo" onclick="showPage('home')" style="cursor:pointer"><svg width="26" height="26" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div class="logo" onclick="showPage('avisos')" style="cursor:pointer"><svg width="26" height="26" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M41,46 L19,46 A22,22 0 0 1 41,24 Z" fill="rgba(255,255,255,0.7)"/>
   <path d="M46,46 L46,20 A26,26 0 0 1 72,46 Z" fill="rgba(255,255,255,0.7)"/>
   <path d="M41,51 L41,71 A20,20 0 0 1 21,51 Z" fill="rgba(255,255,255,0.7)"/>
@@ -481,6 +495,7 @@ input[type=file]{
     <div class="page" id="page-equipo"><div id="dir-content"></div></div>
     <div class="page" id="page-perfil"><div id="perfil-content"></div></div>
     <div class="page" id="page-admin"><div id="admin-content"></div></div>
+    <div class="page" id="page-avisos"></div>
   </div>
   <nav class="botnav">
     <button class="ni on" id="nav-reservar" onclick="if(G('page-reservar').classList.contains('on')){resetAll();}else{showPage('reservar');}"><span class="ni-ico">📅</span><span class="ni-lbl">Reservar</span></button>
@@ -594,7 +609,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycby9CFE4vwmJGBbg1RdS9zMEaXyk_CbAwjaBhFTxjA4MwnxGFvKmgvhDJOEEhhzH63K-/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -607,7 +622,11 @@ var DOWS=['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
 var DU=[
   {id:'u0',nombre:'Administrador',email:'admin@integra.com',pw:hw('admin123'),rol:'admin',tel:'',foto:''},
   {id:'u1',nombre:'Dr. García',email:'garcia@demo.com',pw:hw('123456'),rol:'user',tel:'+5491111111111',foto:''},
-  {id:'u2',nombre:'Dra. Martínez',email:'martinez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491122222222',foto:''}
+  {id:'u2',nombre:'Dra. Martínez',email:'martinez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491122222222',foto:''},
+  {id:'u3',nombre:'Dr. Rodríguez',email:'rodriguez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491133333333',foto:''},
+  {id:'u4',nombre:'Dra. López',email:'lopez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491144444444',foto:''},
+  {id:'u5',nombre:'Dr. Fernández',email:'fernandez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491155555555',foto:''},
+  {id:'u6',nombre:'Dra. Sánchez',email:'sanchez@demo.com',pw:hw('123456'),rol:'user',tel:'+5491166666666',foto:''}
 ];
 var DR=[];
 
@@ -731,12 +750,43 @@ function apiPost(p,cb){
 }
 function uSafe(u){return{id:u.id,nombre:u.nombre,email:u.email,rol:u.rol,telefono:u.telefono||u.tel||'',foto:u.foto||''};}
 function initDR(){
-  var t=today(),n=new Date(Date.now()+86400000),tm=n.getFullYear()+'-'+pad(n.getMonth()+1)+'-'+pad(n.getDate());
+  var t=today();
+  // Generar fechas para los próximos 7 días
+  function nextDay(n){var d=new Date();d.setDate(d.getDate()+n);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+  var d1=nextDay(1),d2=nextDay(2),d3=nextDay(3),d4=nextDay(4),d5=nextDay(5),d6=nextDay(6),d7=nextDay(7);
   DR=[
-    {id:'r1',consulId:'1',fecha:t,startH:9,endH:11,userId:'u1',userName:'Dr. García'},
-    {id:'r2',consulId:'2',fecha:t,startH:8,endH:10,userId:'u2',userName:'Dra. Martínez'},
-    {id:'r3',consulId:'3',fecha:t,startH:10,endH:12,userId:'u1',userName:'Dr. García'},
-    {id:'r4',consulId:'5',fecha:tm,startH:9,endH:11,userId:'u2',userName:'Dra. Martínez'}
+    // Hoy
+    {id:'r1', consulId:'1',fecha:t,  startH:9, endH:11,userId:'u1',userName:'Dr. García'},
+    {id:'r2', consulId:'2',fecha:t,  startH:8, endH:10,userId:'u2',userName:'Dra. Martínez'},
+    {id:'r3', consulId:'3',fecha:t,  startH:10,endH:12,userId:'u3',userName:'Dr. Rodríguez'},
+    {id:'r4', consulId:'4',fecha:t,  startH:14,endH:16,userId:'u4',userName:'Dra. López'},
+    // Mañana
+    {id:'r5', consulId:'1',fecha:d1, startH:8, endH:10,userId:'u2',userName:'Dra. Martínez'},
+    {id:'r6', consulId:'3',fecha:d1, startH:9, endH:12,userId:'u5',userName:'Dr. Fernández'},
+    {id:'r7', consulId:'5',fecha:d1, startH:11,endH:13,userId:'u1',userName:'Dr. García'},
+    {id:'r8', consulId:'6',fecha:d1, startH:15,endH:17,userId:'u6',userName:'Dra. Sánchez'},
+    // +2 días
+    {id:'r9', consulId:'2',fecha:d2, startH:9, endH:11,userId:'u3',userName:'Dr. Rodríguez'},
+    {id:'r10',consulId:'4',fecha:d2, startH:10,endH:13,userId:'u4',userName:'Dra. López'},
+    {id:'r11',consulId:'7',fecha:d2, startH:8, endH:10,userId:'u1',userName:'Dr. García'},
+    // +3 días
+    {id:'r12',consulId:'1',fecha:d3, startH:9, endH:11,userId:'u5',userName:'Dr. Fernández'},
+    {id:'r13',consulId:'3',fecha:d3, startH:14,endH:16,userId:'u2',userName:'Dra. Martínez'},
+    {id:'r14',consulId:'5',fecha:d3, startH:10,endH:12,userId:'u6',userName:'Dra. Sánchez'},
+    // +4 días
+    {id:'r15',consulId:'2',fecha:d4, startH:8, endH:10,userId:'u4',userName:'Dra. López'},
+    {id:'r16',consulId:'4',fecha:d4, startH:11,endH:13,userId:'u3',userName:'Dr. Rodríguez'},
+    {id:'r17',consulId:'6',fecha:d4, startH:9, endH:11,userId:'u1',userName:'Dr. García'},
+    // +5 días
+    {id:'r18',consulId:'1',fecha:d5, startH:10,endH:12,userId:'u6',userName:'Dra. Sánchez'},
+    {id:'r19',consulId:'3',fecha:d5, startH:8, endH:10,userId:'u5',userName:'Dr. Fernández'},
+    {id:'r20',consulId:'8',fecha:d5, startH:14,endH:16,userId:'u2',userName:'Dra. Martínez'},
+    // +6 días
+    {id:'r21',consulId:'2',fecha:d6, startH:9, endH:11,userId:'u1',userName:'Dr. García'},
+    {id:'r22',consulId:'5',fecha:d6, startH:10,endH:13,userId:'u3',userName:'Dr. Rodríguez'},
+    // +7 días
+    {id:'r23',consulId:'1',fecha:d7, startH:8, endH:10,userId:'u4',userName:'Dra. López'},
+    {id:'r24',consulId:'4',fecha:d7, startH:11,endH:13,userId:'u6',userName:'Dra. Sánchez'}
   ];
 }
 
@@ -993,7 +1043,7 @@ function doLogout(){
 
 /* NAV */
 function showPage(name){
-  ['home','reservar','misreservas','agenda','ahora','equipo','perfil','admin'].forEach(function(p){
+  ['home','reservar','misreservas','agenda','ahora','equipo','perfil','admin','avisos'].forEach(function(p){
     var pg=G('page-'+p),nb=G('nav-'+p);
     if(pg)pg.className='page'+(p===name?' on':'');
     if(nb)nb.className='ni'+(p===name?' on':'');
@@ -1017,6 +1067,7 @@ function showPage(name){
   if(name==='equipo')loadEquipo();
   if(name==='perfil')renderPerfil();
   if(name==='admin')loadAdmin();
+  if(name==='avisos')renderAvisos();
 }
 
 /* DATOS */
@@ -1174,7 +1225,6 @@ function renderS3(){
   libres.forEach(function(c){
     var isSel=selC&&selC.id===c.id;
     var div=mkEl('div','cc pick'+(isSel?' sel':''));
-    div.appendChild(mkEl('span','cbadge free','Libre'));
     var imgDiv=mkEl('div','cc-img');
     if(c.foto){var img=mkEl('img');img.src=c.foto;imgDiv.appendChild(img);}
     else{var dot=mkEl('div','cdot');dot.style.background=c.color;imgDiv.appendChild(dot);}
@@ -1958,6 +2008,62 @@ function doRecovery(){
       setMsg('rec-msg','✓ Te enviamos una nueva contraseña al email. Revisa tu bandeja.','ok');
       setTimeout(function(){ closeModal('modal-recovery'); }, 3000);
     }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AVISOS — Editá este array para actualizar los avisos de la app
+   tipo: 'urgente' | 'info' | 'ok' | 'general'
+   ═══════════════════════════════════════════════════════════ */
+var AVISOS = [
+  {
+    tipo: 'urgente',
+    titulo: 'Mantenimiento programado',
+    texto: 'El martes 18 de marzo de 9:00 a 11:00 hs no habrá acceso a los consultorios del primer piso por trabajos de electricidad. Por favor reprogramá tus turnos con anticipación.',
+    fecha: '14 mar 2026'
+  },
+  {
+    tipo: 'info',
+    titulo: 'Nuevos horarios de recepción',
+    texto: 'A partir del lunes 16 de marzo la recepción abre de 7:30 a 20:00 hs de lunes a viernes, y de 8:00 a 14:00 hs los sábados.',
+    fecha: '10 mar 2026'
+  },
+  {
+    tipo: 'ok',
+    titulo: 'Sistema de reservas actualizado',
+    texto: 'Se actualizó el sistema de reservas. Ahora podés ver en tiempo real qué consultorios están disponibles desde la pestaña Ahora. Ante cualquier duda consultá con administración.',
+    fecha: '5 mar 2026'
+  },
+  {
+    tipo: 'general',
+    titulo: 'Recordatorio: limpieza de consultorios',
+    texto: 'Recordamos que al finalizar cada turno es necesario dejar el consultorio en condiciones: descartables en el tacho, camilla con papel nuevo y equipamiento en su lugar.',
+    fecha: '1 mar 2026'
+  }
+];
+
+function renderAvisos(){
+  var pg=G('page-avisos');pg.innerHTML='';
+  // Hero header
+  var hero=mkEl('div');
+  hero.style.cssText='background:var(--acc);margin:-14px -14px 16px;padding:22px 18px 18px;';
+  hero.innerHTML='<div style="font-family:\'Josefin Sans\',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-bottom:4px">Tablón de</div>'
+    +'<div style="font-family:\'Josefin Sans\',sans-serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:1px">Avisos</div>';
+  pg.appendChild(hero);
+  if(!AVISOS.length){
+    var e=mkEl('div','empty');e.innerHTML='<div class="ei">📢</div><h3>Sin avisos por ahora</h3>';pg.appendChild(e);return;
+  }
+  AVISOS.forEach(function(a){
+    var card=mkEl('div','aviso-card '+(a.tipo||'general'));
+    var head=mkEl('div','aviso-head');
+    head.appendChild(mkEl('div','aviso-title',a.titulo));
+    head.appendChild(mkEl('span','aviso-tag '+(a.tipo||'general'),a.tipo==='urgente'?'⚠ Urgente':a.tipo==='info'?'ℹ Info':a.tipo==='ok'?'✓ Novedad':'📢 General'));
+    card.appendChild(head);
+    var body=mkEl('div','aviso-body');
+    body.appendChild(document.createTextNode(a.texto));
+    if(a.fecha){body.appendChild(mkEl('div','aviso-date',a.fecha));}
+    card.appendChild(body);
+    pg.appendChild(card);
   });
 }
 
