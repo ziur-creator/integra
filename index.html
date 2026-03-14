@@ -587,7 +587,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwBiweg2WPa8cf98yhX8DaNQ5in6oZuE9AVQWB2G0P1lcJaSbbXTTt2Z48f3ytQ2v8s/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -695,7 +695,7 @@ function applyPhoto(ctx,data){
   }
 }
 
-function isDemo(){return !API_URL||API_URL.indexOf('https://script.google.com/macros/s/AKfycbwBiweg2WPa8cf98yhX8DaNQ5in6oZuE9AVQWB2G0P1lcJaSbbXTTt2Z48f3ytQ2v8s/exec')!==-1||API_URL.length<20;}
+function isDemo(){return !API_URL||API_URL.indexOf('TU_URL')!==-1||API_URL.length<20;}
 function api(p,cb){
   if(isDemo()){apiDemo(p,cb);return;}
   // Siempre GET — Apps Script acepta GET sin problemas de CORS
