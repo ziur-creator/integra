@@ -489,6 +489,7 @@ input[type=file]{
           <div class="frow">
             <select class="fsel" id="fc" onchange="renderAgenda()"><option value="">Todos los consultorios</option></select>
             <select class="fsel" id="fd" onchange="renderAgenda()"><option value="">Todas las fechas</option></select>
+            <select class="fsel" id="fp" onchange="renderAgenda()"><option value="">Todos los profesionales</option></select>
           </div>
           <div id="agenda-content"></div>
         </div>
@@ -613,7 +614,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbyV-oNJFCLevhyFkri2RiMRU7mz83CN-YeHuz-xGe5zgwYJPQAzk45Dq84EsMTAeoiO/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -753,45 +754,48 @@ function apiPost(p,cb){
   x.send(JSON.stringify(p));
 }
 function uSafe(u){return{id:u.id,nombre:u.nombre,email:u.email,rol:u.rol,telefono:u.telefono||u.tel||'',foto:u.foto||''};}
+function saveDR(){
+  try{localStorage.setItem('im_dr',JSON.stringify(DR));}catch(e){}
+}
+function loadDR(){
+  try{
+    var s=localStorage.getItem('im_dr');
+    if(s){DR=JSON.parse(s);return true;}
+  }catch(e){}
+  return false;
+}
 function initDR(){
+  if(loadDR()) return; // usar datos guardados si existen
   var t=today();
-  // Generar fechas para los próximos 7 días
   function nextDay(n){var d=new Date();d.setDate(d.getDate()+n);return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
   var d1=nextDay(1),d2=nextDay(2),d3=nextDay(3),d4=nextDay(4),d5=nextDay(5),d6=nextDay(6),d7=nextDay(7);
   DR=[
-    // Hoy
     {id:'r1', consulId:'1',fecha:t,  startH:9, endH:11,userId:'u1',userName:'Dr. García'},
     {id:'r2', consulId:'2',fecha:t,  startH:8, endH:10,userId:'u2',userName:'Dra. Martínez'},
     {id:'r3', consulId:'3',fecha:t,  startH:10,endH:12,userId:'u3',userName:'Dr. Rodríguez'},
     {id:'r4', consulId:'4',fecha:t,  startH:14,endH:16,userId:'u4',userName:'Dra. López'},
-    // Mañana
     {id:'r5', consulId:'1',fecha:d1, startH:8, endH:10,userId:'u2',userName:'Dra. Martínez'},
     {id:'r6', consulId:'3',fecha:d1, startH:9, endH:12,userId:'u5',userName:'Dr. Fernández'},
     {id:'r7', consulId:'5',fecha:d1, startH:11,endH:13,userId:'u1',userName:'Dr. García'},
     {id:'r8', consulId:'6',fecha:d1, startH:15,endH:17,userId:'u6',userName:'Dra. Sánchez'},
-    // +2 días
     {id:'r9', consulId:'2',fecha:d2, startH:9, endH:11,userId:'u3',userName:'Dr. Rodríguez'},
     {id:'r10',consulId:'4',fecha:d2, startH:10,endH:13,userId:'u4',userName:'Dra. López'},
     {id:'r11',consulId:'7',fecha:d2, startH:8, endH:10,userId:'u1',userName:'Dr. García'},
-    // +3 días
     {id:'r12',consulId:'1',fecha:d3, startH:9, endH:11,userId:'u5',userName:'Dr. Fernández'},
     {id:'r13',consulId:'3',fecha:d3, startH:14,endH:16,userId:'u2',userName:'Dra. Martínez'},
     {id:'r14',consulId:'5',fecha:d3, startH:10,endH:12,userId:'u6',userName:'Dra. Sánchez'},
-    // +4 días
     {id:'r15',consulId:'2',fecha:d4, startH:8, endH:10,userId:'u4',userName:'Dra. López'},
     {id:'r16',consulId:'4',fecha:d4, startH:11,endH:13,userId:'u3',userName:'Dr. Rodríguez'},
     {id:'r17',consulId:'6',fecha:d4, startH:9, endH:11,userId:'u1',userName:'Dr. García'},
-    // +5 días
     {id:'r18',consulId:'1',fecha:d5, startH:10,endH:12,userId:'u6',userName:'Dra. Sánchez'},
     {id:'r19',consulId:'3',fecha:d5, startH:8, endH:10,userId:'u5',userName:'Dr. Fernández'},
     {id:'r20',consulId:'8',fecha:d5, startH:14,endH:16,userId:'u2',userName:'Dra. Martínez'},
-    // +6 días
     {id:'r21',consulId:'2',fecha:d6, startH:9, endH:11,userId:'u1',userName:'Dr. García'},
     {id:'r22',consulId:'5',fecha:d6, startH:10,endH:13,userId:'u3',userName:'Dr. Rodríguez'},
-    // +7 días
     {id:'r23',consulId:'1',fecha:d7, startH:8, endH:10,userId:'u4',userName:'Dra. López'},
     {id:'r24',consulId:'4',fecha:d7, startH:11,endH:13,userId:'u6',userName:'Dra. Sánchez'}
   ];
+  saveDR();
 }
 
 function apiDemo(p,cb){
@@ -822,6 +826,7 @@ function apiDemo(p,cb){
       var sH=parseInt(p.startH),eH=parseInt(p.endH),cId=String(p.consulId);
       for(i=0;i<DR.length;i++){r=DR[i];if(r.consulId===cId&&r.fecha===p.fecha&&!(eH<=r.startH||sH>=r.endH))return cb(null,{ok:false,error:'El consultorio ya está reservado en ese horario'});if(String(r.userId)===String(p.userId)&&r.fecha===p.fecha&&!(eH<=r.startH||sH>=r.endH))return cb(null,{ok:false,error:'Ya tenés una reserva en ese horario. No podés reservar dos consultorios al mismo tiempo'});}
       var nid='r'+Date.now();DR.push({id:nid,consulId:cId,fecha:p.fecha,startH:sH,endH:eH,userId:String(p.userId),userName:p.userName||''});
+      saveDR();
       return cb(null,{ok:true,id:nid});
     }
     if(p.action==='addReservationBatch'){
@@ -840,16 +845,17 @@ function apiDemo(p,cb){
         DR.push({id:bid,consulId:cId,fecha:fd,startH:sH,endH:eH,userId:String(p.userId),userName:p.userName||''});
         creadas.push(fd);
       }
+      saveDR();
       return cb(null,{ok:true,creadas:creadas,errores:errores});
     }
     if(p.action==='cancelReservation'){
       var rid=String(p.id),uid=String(p.userId);
-      for(i=0;i<DR.length;i++)if(DR[i].id===rid){if(DR[i].userId!==uid)return cb(null,{ok:false,error:'Sin permiso'});DR.splice(i,1);return cb(null,{ok:true});}
+      for(i=0;i<DR.length;i++)if(DR[i].id===rid){if(DR[i].userId!==uid)return cb(null,{ok:false,error:'Sin permiso'});DR.splice(i,1);saveDR();return cb(null,{ok:true});}
       return cb(null,{ok:false,error:'No encontrada'});
     }
     if(p.action==='adminCancelReservation'){
       var rid=String(p.id);
-      for(i=0;i<DR.length;i++)if(DR[i].id===rid){DR.splice(i,1);return cb(null,{ok:true});}
+      for(i=0;i<DR.length;i++)if(DR[i].id===rid){DR.splice(i,1);saveDR();return cb(null,{ok:true});}
       return cb(null,{ok:false,error:'No encontrada'});
     }
     if(p.action==='getUsers')return cb(null,{ok:true,users:DU.map(uSafe)});
@@ -1294,11 +1300,22 @@ function renderMR(){
 /* AGENDA */
 function renderAgenda(){
   var tod=today();
-  var fc=G('fc'),fd=G('fd'),vc=fc.value,vd=fd.value;
-  var optC='<option value="">Todos los consultorios</option>';CS.forEach(function(c){optC+='<option value="'+c.id+'">'+c.name+'</option>';});fc.innerHTML=optC;fc.value=vc;
+  var fc=G('fc'),fd=G('fd'),fp=G('fp');
+  var vc=fc.value,vd=fd.value,vp=fp?fp.value:'';
+  var optC='<option value="">Todos los consultorios</option>';CS.forEach(function(c){optC+='<option value="'+c.id+'"'+(c.id===vc?' selected':'')+'>'+c.name+'</option>';});fc.innerHTML=optC;
   var dates=[];RR.forEach(function(r){if(dates.indexOf(r.fecha)<0)dates.push(r.fecha);});dates.sort();
-  var optD='<option value="">Todas las fechas</option>';dates.forEach(function(d){optD+='<option value="'+d+'">'+fmtDate(d)+'</option>';});fd.innerHTML=optD;fd.value=vd;
-  var f=RR.filter(function(r){if(vc&&r.consulId!==vc)return false;if(vd&&r.fecha!==vd)return false;return true;});
+  var optD='<option value="">Todas las fechas</option>';dates.forEach(function(d){optD+='<option value="'+d+'"'+(d===vd?' selected':'')+'>'+fmtDate(d)+'</option>';});fd.innerHTML=optD;
+  // Selector de profesional — nombres únicos de userName en RR
+  if(fp){
+    var names=[];RR.forEach(function(r){if(r.userName&&names.indexOf(r.userName)<0)names.push(r.userName);});names.sort();
+    var optP='<option value="">Todos los profesionales</option>';names.forEach(function(n){optP+='<option value="'+n+'"'+(n===vp?' selected':'')+'>'+n+'</option>';});fp.innerHTML=optP;
+  }
+  var f=RR.filter(function(r){
+    if(vc&&r.consulId!==vc)return false;
+    if(vd&&r.fecha!==vd)return false;
+    if(vp&&r.userName!==vp)return false;
+    return true;
+  });
   f.sort(function(a,b){return a.fecha<b.fecha?-1:a.fecha>b.fecha?1:a.startH-b.startH;});
   var cnt=G('agenda-content');cnt.innerHTML='';
   if(!f.length){var e=mkEl('div','empty');e.innerHTML='<div class="ei">📅</div><h3>Sin reservas</h3>';cnt.appendChild(e);return;}
