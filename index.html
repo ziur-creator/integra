@@ -587,7 +587,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbw_kg5tMbRagM2YoPPmVre0Lq-VVnTFja7ViaWkP7Ye7h_8yFoDl283WrlnCOzH0VX-/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -1079,7 +1079,15 @@ function goStep(n){
   G('s2').style.display=n===2?'block':'none';
   G('s3').style.display=n===3?'block':'none';
   G('cbar').style.display='none';
-  if(n===2)renderS2();if(n===3)renderS3();updateStepper();
+  if(n===2){renderS2();updateStepper();}
+  else if(n===3){
+    /* Siempre recargar RR antes de mostrar disponibilidad — evita datos stale post-cancelación */
+    var grid=G('consul-grid');
+    grid.innerHTML='<div class="spinner-wrap"><div class="spinner"></div><p style="font-size:12px;color:var(--ink3)">Verificando disponibilidad...</p></div>';
+    loadRR(function(){selC=null;renderS3();updateStepper();});
+  } else {
+    updateStepper();
+  }
 }
 function updateStepper(){
   function setSt(i,val,cls){G('si'+i).className='st '+cls;G('sv'+i).textContent=val;}
@@ -1126,17 +1134,16 @@ function renderS3(){
   G('s3-sub').textContent=fmtDateLong(selDate)+' · '+fmtH(selSS)+'–'+fmtH(selSE);
   G('cbar').style.display='none';
   var grid=G('consul-grid');grid.innerHTML='';
-  /* Conflicto del usuario en este horario (otro consultorio ya reservado) */
+  /* uc: el usuario ya tiene reserva en este horario (cualquier consultorio) */
   var uc=userConflict(CU.id,selDate,selSS,selSE);
+  var ucConsul = uc ? byId(CS,uc.consulId) : null;
   CS.forEach(function(c){
     var cf=conflict(c.id,selDate,selSS,selSE),isSel=selC&&selC.id===c.id;
-    /* Si el usuario ya tiene reserva en este horario (en otro consultorio), bloquear todos */
-    var userBlocked = uc && (!cf || cf.userId!==CU.id); // hay conflicto de usuario pero no es este mismo consultorio
-    var isOcc = cf || userBlocked;
+    /* Bloqueado si el consultorio está ocupado O si el usuario ya reservó en este horario */
+    var isOcc = !!(cf || uc);
     var div=mkEl('div','cc'+(isOcc?' occ':' pick')+(isSel&&!isOcc?' sel':''));
-    var badgeLabel = cf ? 'Ocupado' : (userBlocked ? 'Ya reservado' : 'Libre');
-    var badgeCls   = isOcc ? 'busy' : 'free';
-    div.appendChild(mkEl('span','cbadge '+badgeCls, badgeLabel));
+    var badgeLabel = cf ? 'Ocupado' : (uc ? 'Ya reservado' : 'Libre');
+    div.appendChild(mkEl('span','cbadge '+(isOcc?'busy':'free'), badgeLabel));
     var imgDiv=mkEl('div','cc-img');
     if(c.foto){var img=mkEl('img');img.src=c.foto;imgDiv.appendChild(img);}
     else{var dot=mkEl('div','cdot');dot.style.background=c.color;imgDiv.appendChild(dot);}
@@ -1145,9 +1152,8 @@ function renderS3(){
     if(cf){
       div.appendChild(mkEl('div','cstat busy',fmtH(cf.startH)+'–'+fmtH(cf.endH)));
       div.appendChild(mkEl('div','cwho',cf.userName||'–'));
-    } else if(userBlocked){
-      var ucConsul = byId(CS,uc.consulId);
-      div.appendChild(mkEl('div','cstat busy','Ya tenés '+(ucConsul?ucConsul.name:'otro consultorio')+' en este horario'));
+    } else if(uc){
+      div.appendChild(mkEl('div','cstat busy','Ya reservaste '+(ucConsul?ucConsul.name:'otro consultorio')+' en este horario'));
     } else {
       div.appendChild(mkEl('div','cstat free','Disponible'));
       (function(consul){div.onclick=function(){pickConsul(consul);};})(c);
@@ -1961,14 +1967,14 @@ function doRecovery(){
 
 <!-- MODAL RECUPERAR CONTRASEÑA -->
 <div class="modal-ov hide" id="modal-recovery" onclick="if(event.target===this)closeModal('modal-recovery')">
-  <div class="mbox">
-    <div class="mh"><span class="mtitle">Recuperar contraseña</span><button class="mclose" onclick="closeModal('modal-recovery')">✕</button></div>
-    <div class="mb">
-      <p style="font-size:13px;color:var(--ink2);margin:0 0 14px">Ingresá tu email y te enviamos una nueva contraseña temporal.</p>
-      <div class="fld"><label>Email</label><input type="email" id="rec-email" placeholder="tu@email.com" inputmode="email" autocomplete="email"></div>
-      <div id="rec-msg"></div>
-      <button class="abtn" onclick="doRecovery()" style="margin-top:8px">Enviar nueva contraseña</button>
-    </div>
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Recuperar contraseña</div>
+    <p style="font-size:13px;color:var(--ink2);margin:0 0 14px">Ingresá tu email y te enviamos una nueva contraseña temporal.</p>
+    <div class="fld"><label>Email</label><input type="email" id="rec-email" placeholder="tu@email.com" inputmode="email" autocomplete="email"></div>
+    <div id="rec-msg"></div>
+    <button class="abtn" onclick="doRecovery()" style="margin-top:8px">Enviar nueva contraseña</button>
+    <button class="btn btn-ghost btn-full" onclick="closeModal('modal-recovery')" style="margin-top:8px">Cancelar</button>
   </div>
 </div>
 </body>
