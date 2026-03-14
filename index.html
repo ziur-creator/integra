@@ -587,7 +587,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbzV5a4inBpHjYti9_bx-NOQZsvznHC9VV-Wuo2YbrMz4mcORXWPGFqCez0hs5_wTOdc/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -606,7 +606,7 @@ var DR=[];
 
 function G(id){return document.getElementById(id);}
 function pad(n){return n<10?'0'+n:String(n);}
-function hw(pw){var h=0;for(var i=0;i<pw.length;i++){h=((h<<5)-h)+pw.charCodeAt(i);h=h&h;}return 'h'+Math.abs(h).toString(36)+'_'+pw.length;}
+function hw(pw){var h=0;for(var i=0;i<pw.length;i++){h=((h<<5)-h)+pw.charCodeAt(i);h=h&h;}return 'h_'+Math.abs(h).toString(36)+'_'+pw.length;}
 
 /* CRÍTICO Safari iOS: nunca usar new Date('YYYY-MM-DD') — parsear manualmente */
 function parseDate(s){var p=s.split('-');return new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2]));}
@@ -1315,7 +1315,7 @@ function savePerfil(){
   if(pw&&pw.length<6){setMsg('p-msg','Contraseña mínimo 6 caracteres','err');return;}
   setMsg('p-msg','Guardando...','');
   var p={action:'updateProfile',userId:CU.id,nombre:name,telefono:phone};if(pw)p.password=pw;
-  api(p,function(err,res){
+  apiPost(p,function(err,res){
     if(err||!res.ok){setMsg('p-msg',res&&res.error||'Error','err');return;}
     CU=res.user;saveLocal();updateChip();setMsg('p-msg','✓ Perfil actualizado','ok');renderPerfil();
   });
@@ -1568,7 +1568,21 @@ var agendaView = 'list'; // 'list' | 'cal'
 var calvYear, calvMonth, calvWeekStart; // for calendar view navigation
 var calvMode = 'week'; // 'week' only for now
 
-function setAgendaView(v){ agendaView='list'; G('agenda-list-wrap').style.display='block'; renderAgenda(); }
+function setAgendaView(v){
+  agendaView = v || 'list';
+  var listWrap = G('agenda-list-wrap');
+  var calvWrap = G('agenda-calv-wrap');
+  if(agendaView === 'cal'){
+    if(listWrap) listWrap.style.display = 'none';
+    if(calvWrap) calvWrap.style.display = 'block';
+    if(!calvWeekStart) calvWeekStart = getWeekStart(today());
+    renderCalView();
+  } else {
+    if(listWrap) listWrap.style.display = 'block';
+    if(calvWrap) calvWrap.style.display = 'none';
+    renderAgenda();
+  }
+}
 
 function calVMove(dir){
   // move by week
