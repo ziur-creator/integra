@@ -433,7 +433,7 @@ input[type=file]{
   <path d="M53,37 L53,10 A27,27 0 0 1 80,37 Z" fill="rgba(255,255,255,0.45)"/>
   <path d="M19,81 L19,94 A13,13 0 0 1 6,81 Z" fill="rgba(255,255,255,0.45)"/>
   <path d="M53,62 L77,62 A24,24 0 0 1 53,86 Z" fill="rgba(255,255,255,0.45)"/>
-</svg><span style="position:relative">INTEGRA <em>MÁS</em><span class="avisos-dot" id="avisos-dot"></span></span></div>
+</svg><span style="position:relative">INTEGRA <em style="position:relative">MÁS<span class="avisos-dot" id="avisos-dot"></span></em></span></div>
     <button class="chip" onclick="openLogout()">
       <div class="chip-av" id="chip-av"></div>
       <span class="chip-name" id="chip-name"></span>
@@ -613,7 +613,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbx1JtT0OLHQX8WdRRXzx0SdXRLoL8avNSw_OroMgEd6dnpz2KAL7M9oMMlXOAmN9-7m/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -1349,12 +1349,14 @@ function renderAgenda(){
 function loadEquipo(){
   var cnt=G('dir-content');
   cnt.innerHTML='<div class="spinner-wrap"><div class="spinner"></div><p>Cargando...</p></div>';
-  api({action:'getUsers'},function(err,res){
-    if(err||!res.ok){
-      // Si falla (ej: usuario sin permiso en versión antigua del backend)
-      // mostrar lo que ya tenemos en AU, o mensaje claro
-      if(AU&&AU.length){renderEquipoList(cnt,AU);}
-      else{cnt.innerHTML='<div class="empty"><div class="ei">👥</div><h3>No se pudo cargar el equipo</h3><p style="font-size:13px;color:var(--ink3);margin-top:6px">'+(res&&res.error||'Sin conexión')+'</p></div>';}
+  apiPost({action:'getUsers'},function(err,res){
+    if(err||!res||!res.ok){
+      if(AU&&AU.length){
+        renderEquipoList(cnt,AU);
+      } else {
+        cnt.innerHTML='<div class="empty"><div class="ei">👥</div><h3>No se pudo cargar el equipo</h3>'
+          +'<p style="font-size:13px;color:var(--ink3);margin-top:6px">'+(res&&res.error||'Sin conexión')+'</p></div>';
+      }
       return;
     }
     AU=res.users||[];
