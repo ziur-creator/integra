@@ -695,7 +695,7 @@ function applyPhoto(ctx,data){
   }
 }
 
-function isDemo(){return !API_URL||API_URL.indexOf('TU_URL')!==-1||API_URL.length<20;}
+function isDemo(){return !API_URL||API_URL.indexOf('https://script.google.com/macros/s/AKfycbwBiweg2WPa8cf98yhX8DaNQ5in6oZuE9AVQWB2G0P1lcJaSbbXTTt2Z48f3ytQ2v8s/exec')!==-1||API_URL.length<20;}
 function api(p,cb){
   if(isDemo()){apiDemo(p,cb);return;}
   // Siempre GET — Apps Script acepta GET sin problemas de CORS
