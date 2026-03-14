@@ -987,7 +987,7 @@ function updateChip(){
   else{av.style.background=avColor(CU.nombre);av.textContent=ini(CU.nombre);}
 }
 function openLogout(){G('ml-name').textContent=CU.nombre;G('ml-email').textContent=CU.email;openModal('modal-logout');}
-unction doLogout() {
+function doLogout() {
   if (!confirm('¿Estás seguro de que deseas cerrar sesión?')) return;
  
   CU = null;
