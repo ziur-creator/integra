@@ -280,7 +280,7 @@ input[type=file]{
 .ahora-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2)}
 /* AVISOS BADGE */
 .logo{position:relative}
-.avisos-dot{position:absolute;top:-1px;right:-10px;width:11px;height:11px;border-radius:50%;background:#ffd4b8;border:2px solid var(--acc);display:none}
+.avisos-dot{position:absolute;bottom:2px;right:-12px;width:11px;height:11px;border-radius:50%;background:#ffd4b8;border:2px solid var(--acc);display:none}
 .avisos-dot.show{display:block;animation:pulse 2s ease-in-out infinite}
 .aviso-card{background:var(--surf);border-radius:var(--r);box-shadow:0 2px 16px rgba(80,40,10,.10);overflow:hidden;margin-bottom:12px;border-left:4px solid var(--acc)}
 .aviso-card.urgente{border-left-color:var(--red)}
@@ -612,7 +612,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbz0nCz46J7cejjxhPZ3LTOQNPKL8aR8mWrPktCcAxRhPe-WJUScRRFNlqhQTJywgSpi/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -743,7 +743,7 @@ function apiPost(p,cb){
   if(isDemo()){apiDemo(p,cb);return;}
   var x=new XMLHttpRequest();
   x.open('POST',API_URL,true);
-  x.timeout=30000;
+  x.timeout=45000;
   x.onload=function(){try{cb(null,JSON.parse(x.responseText));}catch(e){cb(null,{ok:false,error:'Error del servidor'});}};
   x.onerror=function(){cb(null,{ok:false,error:'Sin conexion'});};
   x.ontimeout=function(){cb(null,{ok:false,error:'Tiempo agotado'});};
@@ -949,9 +949,9 @@ function doVerify(){
   var code = (G('verify-code').value||'').trim();
   if(code.length!==6){setMsg('verify-msg','El código debe tener 6 dígitos','err');return;}
   setMsg('verify-msg','Verificando...','');
-  api({action:'verifyEmail', email:_verifyEmail, code:code}, function(err,res){
+  // Usar POST — escribe en el spreadsheet, necesita más timeout que GET
+  apiPost({action:'verifyEmail', email:_verifyEmail, code:code}, function(err,res){
     if(err||!res.ok){setMsg('verify-msg',res&&res.error||'Código incorrecto','err');return;}
-    // Verificado — subir foto si había y arrancar sesión
     if(_verifyPhoto){
       apiPost({action:'updateProfile',userId:res.user.id,foto:_verifyPhoto},function(err2,res2){
         var user=(res2&&res2.ok&&res2.user)?res2.user:res.user;
@@ -966,7 +966,8 @@ function doVerify(){
 }
 function doResend(){
   setMsg('verify-msg','Reenviando...','');
-  api({action:'resendVerification', email:_verifyEmail}, function(err,res){
+  // Usar POST — escribe en el spreadsheet
+  apiPost({action:'resendVerification', email:_verifyEmail}, function(err,res){
     if(err||!res.ok){setMsg('verify-msg',res&&res.error||'Error al reenviar','err');return;}
     setMsg('verify-msg','✓ Código reenviado. Revisá tu bandeja.','ok');
   });
