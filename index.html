@@ -587,7 +587,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbw_kg5tMbRagM2YoPPmVre0Lq-VVnTFja7ViaWkP7Ye7h_8yFoDl283WrlnCOzH0VX-/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -1134,30 +1134,38 @@ function renderS3(){
   G('s3-sub').textContent=fmtDateLong(selDate)+' · '+fmtH(selSS)+'–'+fmtH(selSE);
   G('cbar').style.display='none';
   var grid=G('consul-grid');grid.innerHTML='';
-  /* uc: el usuario ya tiene reserva en este horario (cualquier consultorio) */
+
+  /* Si el usuario ya tiene reserva en este horario, no mostrar nada seleccionable */
   var uc=userConflict(CU.id,selDate,selSS,selSE);
-  var ucConsul = uc ? byId(CS,uc.consulId) : null;
-  CS.forEach(function(c){
-    var cf=conflict(c.id,selDate,selSS,selSE),isSel=selC&&selC.id===c.id;
-    /* Bloqueado si el consultorio está ocupado O si el usuario ya reservó en este horario */
-    var isOcc = !!(cf || uc);
-    var div=mkEl('div','cc'+(isOcc?' occ':' pick')+(isSel&&!isOcc?' sel':''));
-    var badgeLabel = cf ? 'Ocupado' : (uc ? 'Ya reservado' : 'Libre');
-    div.appendChild(mkEl('span','cbadge '+(isOcc?'busy':'free'), badgeLabel));
+  if(uc){
+    var ucConsul=byId(CS,uc.consulId);
+    var msg=mkEl('div','empty');
+    msg.innerHTML='<div class="ei">🚫</div><h3>Horario no disponible</h3><p style="font-size:13px">Ya tenés reservado '+(ucConsul?ucConsul.name:'un consultorio')+' de '+fmtH(uc.startH)+'–'+fmtH(uc.endH)+' ese día.</p>';
+    grid.appendChild(msg);
+    return;
+  }
+
+  /* Mostrar solo consultorios libres en ese horario */
+  var libres=CS.filter(function(c){return !conflict(c.id,selDate,selSS,selSE);});
+  if(!libres.length){
+    var msg2=mkEl('div','empty');
+    msg2.innerHTML='<div class="ei">📅</div><h3>Sin disponibilidad</h3><p style="font-size:13px">Todos los consultorios están ocupados en ese horario.</p>';
+    grid.appendChild(msg2);
+    return;
+  }
+
+  libres.forEach(function(c){
+    var isSel=selC&&selC.id===c.id;
+    var div=mkEl('div','cc pick'+(isSel?' sel':''));
+    div.appendChild(mkEl('span','cbadge free','Libre'));
     var imgDiv=mkEl('div','cc-img');
     if(c.foto){var img=mkEl('img');img.src=c.foto;imgDiv.appendChild(img);}
     else{var dot=mkEl('div','cdot');dot.style.background=c.color;imgDiv.appendChild(dot);}
     div.appendChild(imgDiv);
     div.appendChild(mkEl('div','cname',c.name));
-    if(cf){
-      div.appendChild(mkEl('div','cstat busy',fmtH(cf.startH)+'–'+fmtH(cf.endH)));
-      div.appendChild(mkEl('div','cwho',cf.userName||'–'));
-    } else if(uc){
-      div.appendChild(mkEl('div','cstat busy','Ya reservaste '+(ucConsul?ucConsul.name:'otro consultorio')+' en este horario'));
-    } else {
-      div.appendChild(mkEl('div','cstat free','Disponible'));
-      (function(consul){div.onclick=function(){pickConsul(consul);};})(c);
-    }
+    if(c.descripcion)div.appendChild(mkEl('div','cstat free',c.descripcion));
+    else div.appendChild(mkEl('div','cstat free','Disponible'));
+    (function(consul){div.onclick=function(){pickConsul(consul);};})(c);
     grid.appendChild(div);
   });
 }
@@ -1966,7 +1974,7 @@ function doRecovery(){
 </script>
 
 <!-- MODAL RECUPERAR CONTRASEÑA -->
-<div class="modal-ov hide" id="modal-recovery" onclick="if(event.target===this)closeModal('modal-recovery')">
+<div class="modal-ov hide" id="modal-recovery" onclick="if(event.target===this)closeModal('modal-recovery')" style="z-index:300">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title">Recuperar contraseña</div>
