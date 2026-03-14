@@ -215,6 +215,13 @@ input[type=file]{
 .toast{position:fixed;bottom:calc(var(--navH) + var(--safeB) + 10px);left:50%;transform:translateX(-50%);color:#fff;padding:10px 22px;border-radius:30px;font-size:12px;font-weight:600;letter-spacing:.3px;box-shadow:0 4px 20px rgba(0,0,0,.25);z-index:300;white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis;pointer-events:none;display:none}
 .toast.ok{background:var(--acc)}
 .toast.err{background:var(--red)}
+/* PULL TO REFRESH */
+#ptr-indicator{position:fixed;top:0;left:0;right:0;z-index:400;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--acc);color:#fff;font-size:12px;font-weight:700;font-family:'Josefin Sans',sans-serif;letter-spacing:1px;text-transform:uppercase;height:0;overflow:hidden;transition:height .2s ease;padding-top:var(--safeT)}
+#ptr-indicator.pulling{height:calc(44px + var(--safeT))}
+#ptr-indicator.refreshing{height:calc(44px + var(--safeT))}
+#ptr-indicator .ptr-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+#ptr-indicator.refreshing .ptr-spinner{display:block}
+#ptr-indicator.refreshing .ptr-arrow{display:none}
 /* CALENDAR VIEW */
 .calv-week{display:grid;gap:0;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .calv-head{display:flex;border-bottom:2px solid var(--brd);background:var(--surf2)}
@@ -440,7 +447,7 @@ input[type=file]{
       </div>
       <div id="s3" class="card" style="display:none">
         <div class="ch"><div><h3>🏥 Consultorio</h3><p id="s3-sub"></p></div><button class="btn btn-ghost btn-sm" onclick="goStep(2)">← Horario</button></div>
-        <div class="cb"><p style="font-size:12px;color:var(--ink3);margin-bottom:11px">Rojo = ocupado en tu horario.</p><div class="cgr" id="consul-grid"></div></div>
+        <div class="cb"><div class="cgr" id="consul-grid"></div></div>
       </div>
       <div id="cbar" class="cbar" style="display:none">
         <div><div class="cbar-title" id="cbar-title"></div><div class="cbar-sub" id="cbar-sub"></div></div>
@@ -476,7 +483,7 @@ input[type=file]{
     <div class="page" id="page-admin"><div id="admin-content"></div></div>
   </div>
   <nav class="botnav">
-    <button class="ni on" id="nav-reservar" onclick="showPage('reservar')"><span class="ni-ico">📅</span><span class="ni-lbl">Reservar</span></button>
+    <button class="ni on" id="nav-reservar" onclick="if(G('page-reservar').classList.contains('on')){resetAll();}else{showPage('reservar');}"><span class="ni-ico">📅</span><span class="ni-lbl">Reservar</span></button>
     <button class="ni" id="nav-misreservas" onclick="showPage('misreservas')"><span class="ni-ico">📋</span><span class="ni-lbl">Mis Turnos</span></button>
     <button class="ni" id="nav-agenda" onclick="showPage('agenda')"><span class="ni-ico">🕐</span><span class="ni-lbl">Agenda</span></button>
     <button class="ni" id="nav-ahora" onclick="showPage('ahora')"><span class="ni-ico">🟢</span><span class="ni-lbl">Ahora</span></button>
@@ -587,7 +594,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycby9CFE4vwmJGBbg1RdS9zMEaXyk_CbAwjaBhFTxjA4MwnxGFvKmgvhDJOEEhhzH63K-/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -1139,8 +1146,13 @@ function renderS3(){
   var uc=userConflict(CU.id,selDate,selSS,selSE);
   if(uc){
     var ucConsul=byId(CS,uc.consulId);
-    var msg=mkEl('div','empty');
-    msg.innerHTML='<div class="ei">🚫</div><h3>Horario no disponible</h3><p style="font-size:13px">Ya tenés reservado '+(ucConsul?ucConsul.name:'un consultorio')+' de '+fmtH(uc.startH)+'–'+fmtH(uc.endH)+' ese día.</p>';
+    var msg=mkEl('div');
+    msg.style.cssText='grid-column:1/-1;background:var(--redL);border:1.5px solid var(--red);border-radius:var(--r);padding:20px 18px;display:flex;gap:14px;align-items:flex-start';
+    msg.innerHTML='<div style="font-size:28px;flex-shrink:0">🚫</div>'
+      +'<div><div style="font-family:\'Josefin Sans\',sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--red);margin-bottom:4px">Horario no disponible</div>'
+      +'<div style="font-size:13px;color:var(--ink2)">Ya tenés reservado <strong>'+(ucConsul?ucConsul.name:'un consultorio')+'</strong> de <strong>'+fmtH(uc.startH)+'–'+fmtH(uc.endH)+'</strong> ese día.</div>'
+      +'<button onclick="goStep(2)" style="margin-top:10px;background:var(--red);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Josefin Sans\',sans-serif;letter-spacing:.5px">← Cambiar horario</button>'
+      +'</div>';
     grid.appendChild(msg);
     return;
   }
@@ -1148,8 +1160,13 @@ function renderS3(){
   /* Mostrar solo consultorios libres en ese horario */
   var libres=CS.filter(function(c){return !conflict(c.id,selDate,selSS,selSE);});
   if(!libres.length){
-    var msg2=mkEl('div','empty');
-    msg2.innerHTML='<div class="ei">📅</div><h3>Sin disponibilidad</h3><p style="font-size:13px">Todos los consultorios están ocupados en ese horario.</p>';
+    var msg2=mkEl('div');
+    msg2.style.cssText='grid-column:1/-1;background:var(--surf2);border:1.5px solid var(--brd);border-radius:var(--r);padding:20px 18px;display:flex;gap:14px;align-items:flex-start';
+    msg2.innerHTML='<div style="font-size:28px;flex-shrink:0">📅</div>'
+      +'<div><div style="font-family:\'Josefin Sans\',sans-serif;font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--ink2);margin-bottom:4px">Sin disponibilidad</div>'
+      +'<div style="font-size:13px;color:var(--ink2)">Todos los consultorios están ocupados en ese horario.</div>'
+      +'<button onclick="goStep(2)" style="margin-top:10px;background:var(--acc);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:\'Josefin Sans\',sans-serif;letter-spacing:.5px">← Cambiar horario</button>'
+      +'</div>';
     grid.appendChild(msg2);
     return;
   }
@@ -1985,5 +2002,73 @@ function doRecovery(){
     <button class="btn btn-ghost btn-full" onclick="closeModal('modal-recovery')" style="margin-top:8px">Cancelar</button>
   </div>
 </div>
+<!-- PULL TO REFRESH INDICATOR -->
+<div id="ptr-indicator">
+  <span class="ptr-arrow">↓</span>
+  <span class="ptr-spinner"></span>
+  <span id="ptr-label">Suelta para actualizar</span>
+</div>
+
+<script>
+/* ── PULL TO REFRESH ── */
+(function(){
+  var el = G('pcontent');
+  var ind = G('ptr-indicator');
+  var lbl = G('ptr-label');
+  var startY = 0, pulling = false, triggered = false;
+  var THRESHOLD = 72;
+
+  function currentPage(){
+    var pages=['home','reservar','misreservas','agenda','ahora','equipo','perfil','admin'];
+    for(var i=0;i<pages.length;i++){ var pg=G('page-'+pages[i]); if(pg&&pg.classList.contains('on'))return pages[i]; }
+    return null;
+  }
+
+  function doRefresh(page){
+    ind.className='ptr-indicator refreshing';
+    lbl.textContent='Actualizando...';
+    function done(){ ind.className='ptr-indicator'; setTimeout(function(){ind.style.height='';},300); }
+    if(page==='ahora'){ loadRR(function(){ renderAhora(); done(); showToast('✓ Actualizado','ok'); }); }
+    else if(page==='misreservas'){ loadRR(function(){ renderMR(); done(); showToast('✓ Actualizado','ok'); }); }
+    else if(page==='agenda'){ loadRR(function(){ renderAgenda(); done(); showToast('✓ Actualizado','ok'); }); }
+    else if(page==='equipo'){ loadEquipo(); setTimeout(done, 800); showToast('✓ Actualizado','ok'); }
+    else if(page==='reservar'){ loadRR(function(){ renderCal(); done(); showToast('✓ Actualizado','ok'); }); }
+    else if(page==='admin'){ loadAdmin(); setTimeout(done, 800); showToast('✓ Actualizado','ok'); }
+    else { done(); }
+  }
+
+  el.addEventListener('touchstart', function(e){
+    if(el.scrollTop===0){ startY=e.touches[0].clientY; pulling=true; triggered=false; }
+  }, {passive:true});
+
+  el.addEventListener('touchmove', function(e){
+    if(!pulling) return;
+    var dy = e.touches[0].clientY - startY;
+    if(dy <= 0){ pulling=false; return; }
+    var progress = Math.min(dy / THRESHOLD, 1);
+    var h = Math.min(dy * 0.45, 60);
+    ind.style.height = h + 'px';
+    if(dy >= THRESHOLD && !triggered){
+      ind.className='ptr-indicator pulling';
+      lbl.textContent='Suelta para actualizar';
+    } else if(dy < THRESHOLD){
+      ind.className='ptr-indicator pulling';
+      lbl.textContent='Arrastrá para actualizar';
+    }
+  }, {passive:true});
+
+  el.addEventListener('touchend', function(){
+    if(!pulling) return;
+    pulling=false;
+    var h = parseInt(ind.style.height||'0');
+    if(h >= THRESHOLD * 0.45){
+      doRefresh(currentPage());
+    } else {
+      ind.className='ptr-indicator';
+      ind.style.height='';
+    }
+  });
+})();
+</script>
 </body>
 </html>
