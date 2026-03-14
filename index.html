@@ -613,7 +613,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbx1JtT0OLHQX8WdRRXzx0SdXRLoL8avNSw_OroMgEd6dnpz2KAL7M9oMMlXOAmN9-7m/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -990,27 +990,8 @@ function doRegister(){
   setMsg('r-msg','Creando cuenta...','');
   apiPost({action:'register',nombre:name,email:email,password:pw,telefono:phone},function(err,res){
     if(err||!res.ok){setMsg('r-msg',res&&res.error||'Error','err');return;}
-    // Registro exitoso — mostrar paso de verificación
-    if(res.pendingVerification){
-      showVerifyStep(res.email||email, photoReg);
-      if(res._demoCode){
-        setTimeout(function(){
-          setMsg('verify-msg','MODO DEMO — Usa el c&oacute;digo: <strong>'+res._demoCode+'</strong>','ok');
-          G('verify-code').value = res._demoCode;
-        },200);
-      }
-    } else {
-      // Cuenta sin verificación (ej: modo demo antiguo)
-      if(photoReg){
-        apiPost({action:'updateProfile',userId:res.user.id,foto:photoReg},function(err2,res2){
-          var user=(res2&&res2.ok&&res2.user)?res2.user:res.user;
-          if(res2&&res2.ok&&res2.user&&res2.user.foto)user.foto=res2.user.foto;
-          setTimeout(function(){photoReg='';startSession(user);},400);
-        });
-      } else {
-        setTimeout(function(){photoReg='';startSession(res.user);},400);
-      }
-    }
+    // En producción siempre hay verificación pendiente
+    showVerifyStep(res.email||email, photoReg);
   });
 }
 function startSession(user){
@@ -1031,6 +1012,7 @@ function startSession(user){
   loadRR(function(){renderCal();updateStepper();});
   // Mostrar dot de avisos si hay avisos nuevos no vistos
   try{
+    loadAvisos();
     var seen=parseInt(localStorage.getItem('im_avisos_seen')||'0');
     if(AVISOS.length>0 && seen<AVISOS.length){
       var dot=G('avisos-dot');if(dot)dot.className='avisos-dot show';
@@ -1547,14 +1529,43 @@ function addBlock(){
   var reason = (G('blk-reason').value||'').trim();
   if(!date){setMsg('blk-msg','Elegí una fecha','err');return;}
   if(isBlocked(date)){setMsg('blk-msg','Esa fecha ya está bloqueada','err');return;}
-  // Demo: guardamos en memoria + localStorage
-  BLOCKED.push({date:date, reason:reason||'Bloqueado'});
-  saveBlocked();
-  renderBlockList();
-  renderCal();
-  setMsg('blk-msg','✓ Fecha bloqueada','ok');
-  G('blk-date').value = today();
-  G('blk-reason').value = '';
+
+  // Cancelar todas las reservas de esa fecha
+  var reservasDelDia = RR.filter(function(r){return r.fecha===date;});
+  var canceladas = 0;
+  function cancelNext(idx){
+    if(idx>=reservasDelDia.length){
+      // Todas canceladas — guardar bloqueo
+      RR = RR.filter(function(r){return r.fecha!==date;});
+      BLOCKED.push({date:date, reason:reason||'Bloqueado'});
+      saveBlocked();
+      renderBlockList();
+      renderCal();
+      var msg = '✓ Fecha bloqueada';
+      if(canceladas>0) msg += ' · '+canceladas+' reserva'+(canceladas>1?'s':'')+' cancelada'+(canceladas>1?'s':'');
+      setMsg('blk-msg', msg, 'ok');
+      G('blk-date').value = today();
+      G('blk-reason').value = '';
+      return;
+    }
+    var r = reservasDelDia[idx];
+    api({action:'adminCancelReservation', adminId:CU.id, id:r.id}, function(err,res){
+      if(res&&res.ok) canceladas++;
+      cancelNext(idx+1);
+    });
+  }
+  if(reservasDelDia.length>0){
+    setMsg('blk-msg','Cancelando '+reservasDelDia.length+' reserva(s)...','');
+    cancelNext(0);
+  } else {
+    BLOCKED.push({date:date, reason:reason||'Bloqueado'});
+    saveBlocked();
+    renderBlockList();
+    renderCal();
+    setMsg('blk-msg','✓ Fecha bloqueada','ok');
+    G('blk-date').value = today();
+    G('blk-reason').value = '';
+  }
 }
 
 function removeBlock(date){
@@ -2029,10 +2040,12 @@ function doRecovery(){
 }
 
 /* ═══════════════════════════════════════════════════════════
-   AVISOS — Editá este array para actualizar los avisos de la app
+   AVISOS — Los avisos se cargan desde localStorage si los hay
+   (creados desde la app por el admin), sino desde el array
+   AVISOS_DEFAULT hardcodeado abajo.
    tipo: 'urgente' | 'info' | 'ok' | 'general'
    ═══════════════════════════════════════════════════════════ */
-var AVISOS = [
+var AVISOS_DEFAULT = [
   {
     tipo: 'urgente',
     titulo: 'Mantenimiento programado',
@@ -2048,7 +2061,7 @@ var AVISOS = [
   {
     tipo: 'ok',
     titulo: 'Sistema de reservas actualizado',
-    texto: 'Se actualizó el sistema de reservas. Ahora podés ver en tiempo real qué consultorios están disponibles desde la pestaña Ahora. Ante cualquier duda consultá con administración.',
+    texto: 'Se actualizó el sistema de reservas. Ahora podés ver en tiempo real qué consultorios están disponibles desde la pestaña Ahora.',
     fecha: '5 mar 2026'
   },
   {
@@ -2058,30 +2071,105 @@ var AVISOS = [
     fecha: '1 mar 2026'
   }
 ];
+var AVISOS = [];
+function loadAvisos(){
+  try{
+    var s=localStorage.getItem('im_avisos');
+    AVISOS = s ? JSON.parse(s) : AVISOS_DEFAULT.slice();
+  }catch(e){ AVISOS = AVISOS_DEFAULT.slice(); }
+}
+function saveAvisos(){
+  try{localStorage.setItem('im_avisos', JSON.stringify(AVISOS));}catch(e){}
+}
 
 function renderAvisos(){
+  loadAvisos();
   var pg=G('page-avisos');pg.innerHTML='';
-  // Marcar avisos como vistos
+  // Marcar como vistos
   try{localStorage.setItem('im_avisos_seen', AVISOS.length);}catch(e){}
   var dot=G('avisos-dot');if(dot)dot.className='avisos-dot';
+
   // Hero header
   var hero=mkEl('div');
   hero.style.cssText='background:var(--acc);margin:-14px -14px 16px;padding:22px 18px 18px;';
   hero.innerHTML='<div style="font-family:\'Josefin Sans\',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-bottom:4px">Tablón de</div>'
     +'<div style="font-family:\'Josefin Sans\',sans-serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:1px">Avisos</div>';
   pg.appendChild(hero);
+
+  // Formulario de creación (solo admin)
+  if(CU && CU.rol==='admin'){
+    var formCard=mkEl('div','card');
+    formCard.style.marginBottom='14px';
+    var fch=mkEl('div','ch');
+    fch.innerHTML='<div><h3>✚ Nuevo aviso</h3></div>';
+    formCard.appendChild(fch);
+    var fcb=mkEl('div','cb');
+    // Tipo
+    var ftipoWrap=mkEl('div','fld');
+    ftipoWrap.innerHTML='<label>Tipo</label>';
+    var fsel=mkEl('select');fsel.id='nav-tipo';fsel.className='fld input';
+    fsel.style.cssText='width:100%;padding:10px 14px;border:1.5px solid var(--brd);border-radius:10px;font-size:14px;background:#fff;-webkit-appearance:none';
+    [{v:'general',l:'📢 General'},{v:'urgente',l:'⚠ Urgente'},{v:'info',l:'ℹ Info'},{v:'ok',l:'✓ Novedad'}].forEach(function(o){
+      var opt=document.createElement('option');opt.value=o.v;opt.textContent=o.l;fsel.appendChild(opt);
+    });
+    ftipoWrap.appendChild(fsel);fcb.appendChild(ftipoWrap);
+    // Título
+    var ftitWrap=mkEl('div','fld');
+    ftitWrap.innerHTML='<label>Título</label>';
+    var ftit=mkEl('input');ftit.id='nav-titulo';ftit.type='text';ftit.placeholder='Título del aviso';
+    ftit.style.cssText='width:100%;padding:10px 14px;border:1.5px solid var(--brd);border-radius:10px;font-size:14px';
+    ftitWrap.appendChild(ftit);fcb.appendChild(ftitWrap);
+    // Texto
+    var ftxtWrap=mkEl('div','fld');
+    ftxtWrap.innerHTML='<label>Texto</label>';
+    var ftxt=document.createElement('textarea');ftxt.id='nav-texto';ftxt.placeholder='Escribí el aviso aquí...';
+    ftxt.style.cssText='width:100%;padding:10px 14px;border:1.5px solid var(--brd);border-radius:10px;font-size:14px;min-height:90px;resize:vertical;font-family:inherit';
+    ftxtWrap.appendChild(ftxt);fcb.appendChild(ftxtWrap);
+    // Msg
+    var fmsg=mkEl('div');fmsg.id='nav-msg';fcb.appendChild(fmsg);
+    // Botón
+    fcb.appendChild(mkBtn('btn btn-pri btn-full','Publicar aviso',function(){
+      var tipo=G('nav-tipo').value;
+      var titulo=(G('nav-titulo').value||'').trim();
+      var texto=(G('nav-texto').value||'').trim();
+      if(!titulo||!texto){setMsg('nav-msg','Completá título y texto','err');return;}
+      var d=new Date();
+      var meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+      var fechaStr=d.getDate()+' '+meses[d.getMonth()]+' '+d.getFullYear();
+      AVISOS.unshift({tipo:tipo,titulo:titulo,texto:texto,fecha:fechaStr});
+      saveAvisos();
+      // Actualizar dot para otros usuarios
+      try{localStorage.setItem('im_avisos_seen','0');}catch(e){}
+      G('nav-titulo').value='';G('nav-texto').value='';
+      setMsg('nav-msg','✓ Aviso publicado','ok');
+      setTimeout(function(){renderAvisos();},500);
+    }));
+    formCard.appendChild(fcb);
+    pg.appendChild(formCard);
+  }
+
   if(!AVISOS.length){
     var e=mkEl('div','empty');e.innerHTML='<div class="ei">📢</div><h3>Sin avisos por ahora</h3>';pg.appendChild(e);return;
   }
-  AVISOS.forEach(function(a){
+  AVISOS.forEach(function(a,idx){
     var card=mkEl('div','aviso-card '+(a.tipo||'general'));
     var head=mkEl('div','aviso-head');
     head.appendChild(mkEl('div','aviso-title',a.titulo));
-    head.appendChild(mkEl('span','aviso-tag '+(a.tipo||'general'),a.tipo==='urgente'?'⚠ Urgente':a.tipo==='info'?'ℹ Info':a.tipo==='ok'?'✓ Novedad':'📢 General'));
+    var tagLabel=a.tipo==='urgente'?'⚠ Urgente':a.tipo==='info'?'ℹ Info':a.tipo==='ok'?'✓ Novedad':'📢 General';
+    head.appendChild(mkEl('span','aviso-tag '+(a.tipo||'general'),tagLabel));
     card.appendChild(head);
     var body=mkEl('div','aviso-body');
     body.appendChild(document.createTextNode(a.texto));
     if(a.fecha){body.appendChild(mkEl('div','aviso-date',a.fecha));}
+    // Botón eliminar solo para admin
+    if(CU&&CU.rol==='admin'){
+      var del=mkBtn('btn btn-danger btn-sm','✕ Eliminar',function(i){return function(){
+        if(!confirm('¿Eliminar este aviso?'))return;
+        AVISOS.splice(i,1);saveAvisos();renderAvisos();
+      };}(idx));
+      del.style.marginTop='8px';
+      body.appendChild(del);
+    }
     card.appendChild(body);
     pg.appendChild(card);
   });
