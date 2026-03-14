@@ -587,7 +587,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbyK_dJ4p37O1E3BACqZ-_pN1gufq8M4vr2DFnAgXU6ef-X5Zm7qP8zvv8MH4Qe9wjzA/exec';
+var API_URL = 'https://script.google.com/macros/s/AKfycbydtUkVcCg-W2Nzm40ITWSnEOxGlZZP3m2rFhaUlTXgGTl7B7lXt5HTZ-ASruMhpScZ/exec';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -950,24 +950,34 @@ function doRegister(){
     }
   });
 }
-function startSession(user){
-  CU=user;saveLocal();
-  // Asegurar que la pantalla de verificación quede limpia
-  G('verify-step').style.display='none';
-  G('auth-brand').style.display='';
-  G('auth-card').style.display='';
-  G('auth').style.display='none';
-  var appEl=G('app');appEl.className='show';appEl.style.display='flex';
+function startSession(user) {
+  if (!user || !user.id) return;
+ 
+  CU = user;
+  saveLocal(); // Guarda la sesión de forma persistente
+ 
+  // Limpieza de interfaz de login
+  G('auth').style.display = 'none';
+  var appEl = G('app');
+  appEl.className = 'show';
+  appEl.style.display = 'flex';
+ 
   updateChip();
-  G('nav-admin').style.display=user.rol==='admin'?'flex':'none';
-  var hta=G('home-tile-admin');if(hta)hta.style.display=user.rol==='admin'?'flex':'none';
-  var n=new Date();calY=n.getFullYear();calM=n.getMonth();
-  calvWeekStart=getWeekStart(today());
+ 
+  // Mostrar/Ocultar opciones de admin
+  G('nav-admin').style.display = (user.rol === 'admin') ? 'flex' : 'none';
+ 
+  // Cargar datos iniciales
   loadBlocked();
   initDR();
-  loadRR(function(){renderCal();updateStepper();});
+  loadRR(function() {
+    renderCal();
+    updateStepper();
+  });
+ 
   showPage('reservar');
 }
+
 function saveLocal(){try{localStorage.setItem('im_user',JSON.stringify(CU));}catch(e){}}
 function updateChip(){
   var av=G('chip-av');
@@ -977,11 +987,21 @@ function updateChip(){
   else{av.style.background=avColor(CU.nombre);av.textContent=ini(CU.nombre);}
 }
 function openLogout(){G('ml-name').textContent=CU.nombre;G('ml-email').textContent=CU.email;openModal('modal-logout');}
-function doLogout(){
-  CU=null;RR=[];AU=[];try{localStorage.removeItem('im_user');}catch(e){}
-  closeModal('modal-logout');var appEl2=G('app');appEl2.className='';appEl2.style.display='none';G('auth').style.display='flex';
-  photoReg='';selDate=null;selSS=null;selSE=null;selC=null;agendaView='list';
-  clearInterval(ahoraTimer);ahoraTimer=null;
+function doLogout() {
+  if (!confirm('¿Estás seguro de que deseas cerrar sesión?')) return;
+ 
+  CU = null;
+  RR = [];
+  try {
+    localStorage.removeItem('im_user'); // Limpia el almacenamiento local
+  } catch(e) {}
+ 
+  // Reset de la UI
+  G('app').className = '';
+  G('app').style.display = 'none';
+  G('auth').style.display = 'flex';
+ 
+  showToast('Sesión cerrada correctamente', 'ok');
 }
 
 /* NAV */
