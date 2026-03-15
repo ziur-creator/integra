@@ -633,7 +633,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwgw_8vcXLb4MXXYXelrN96tu2E3GOv6ylJDW-pIXEUrHJN5ecV8xTC_o6UoCCJqpw/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -1203,7 +1203,7 @@ function renderHome(){
     body.appendChild(prox);
   }
 
-  // Accesos rápidos — burbujas alargadas
+  // Accesos rápidos — burbujas pill
   body.appendChild(mkEl('div','sec-title','Accesos rápidos'));
   var tiles=[
     {icon:'📅',label:'Nueva reserva',page:'reservar'},
@@ -1213,24 +1213,54 @@ function renderHome(){
     {icon:'👥',label:'Equipo',page:'equipo'}
   ];
   if(CU.rol==='admin') tiles.push({icon:'⚙️',label:'Admin',page:'admin'});
-  var list=mkEl('div');list.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:10px';
+  var list=mkEl('div');
+  list.style.cssText='display:flex;flex-direction:column;gap:9px;margin-top:12px';
   tiles.forEach(function(t,idx){
-    var row=mkEl('div');
-    row.style.cssText='display:flex;align-items:center;gap:13px;padding:13px 18px;cursor:pointer;-webkit-tap-highlight-color:transparent;background:rgba(224,120,48,.13);border-radius:40px;border:1.5px solid rgba(224,120,48,.22);transition:background .12s,transform .12s;opacity:0;transform:scale(0.6)';
-    row.innerHTML='<span style="font-size:19px;flex-shrink:0;width:26px;text-align:center">'+t.icon+'</span>'
-      +'<span style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--ink);flex:1">'+t.label+'</span>'
-      +'<span style="font-size:15px;color:var(--acc);font-weight:700;opacity:.6">›</span>';
-    row.ontouchstart=function(){this.style.background='rgba(224,120,48,.28)';this.style.transform='scale(.97)';};
-    row.ontouchend=function(){this.style.background='rgba(224,120,48,.13)';this.style.transform='';};
-    (function(page){row.onclick=function(){showPage(page);};})(t.page);
+    var pill=mkEl('div');
+    pill.style.cssText=[
+      'display:flex',
+      'align-items:center',
+      'gap:14px',
+      'padding:14px 20px',
+      'cursor:pointer',
+      'background:rgba(224,120,48,.14)',
+      'border:1.5px solid rgba(224,120,48,.25)',
+      'border-radius:999px',
+      'transition:transform .18s cubic-bezier(.34,1.56,.64,1), background .12s',
+      '-webkit-tap-highlight-color:transparent',
+      'opacity:0',
+      'transform:scale(.72)'
+    ].join(';');
+    pill.innerHTML=
+      '<span style="font-size:20px;flex-shrink:0;line-height:1">'+t.icon+'</span>'
+      +'<span style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--ink);flex:1">'+t.label+'</span>'
+      +'<span style="color:rgba(224,120,48,.5);font-size:16px;font-weight:700">›</span>';
+    pill.ontouchstart=function(){
+      this.style.transform='scale(1.07)';
+      this.style.background='rgba(224,120,48,.28)';
+    };
+    pill.ontouchend=function(){
+      this.style.transform='scale(1)';
+      this.style.background='rgba(224,120,48,.14)';
+    };
+    pill.onmousedown=function(){
+      this.style.transform='scale(1.07)';
+      this.style.background='rgba(224,120,48,.28)';
+    };
+    pill.onmouseup=function(){
+      this.style.transform='scale(1)';
+      this.style.background='rgba(224,120,48,.14)';
+    };
+    (function(page){pill.onclick=function(){showPage(page);};})(t.page);
+    // entrada escalonada
     (function(el,delay){
       setTimeout(function(){
-        el.style.transition='opacity .28s ease, transform .28s cubic-bezier(.34,1.56,.64,1)';
+        el.style.transition='opacity .3s ease, transform .35s cubic-bezier(.34,1.56,.64,1)';
         el.style.opacity='1';
         el.style.transform='scale(1)';
-      }, 80 + delay * 55);
-    })(row, idx);
-    list.appendChild(row);
+      }, 60 + delay * 65);
+    })(pill, idx);
+    list.appendChild(pill);
   });
   body.appendChild(list);
   cnt.appendChild(body);
