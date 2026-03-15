@@ -468,8 +468,15 @@ input[type=file]{
         <div class="cb"><div class="cgr" id="consul-grid"></div></div>
       </div>
       <div id="cbar" class="cbar" style="display:none">
-        <div><div class="cbar-title" id="cbar-title"></div><div class="cbar-sub" id="cbar-sub"></div></div>
-        <div style="display:flex;gap:8px">
+        <div style="flex:1;min-width:0">
+          <div class="cbar-title" id="cbar-title"></div>
+          <div class="cbar-sub" id="cbar-sub"></div>
+          <div id="cbar-user-wrap" style="display:none;margin-top:8px">
+            <select id="cbar-user" style="width:100%;padding:6px 10px;border-radius:8px;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:13px;font-family:inherit;-webkit-appearance:none;outline:none">
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0">
           <button class="btn btn-ow btn-sm" onclick="resetAll()">✕</button>
           <button class="btn btn-white btn-sm" id="confirm-btn" onclick="confirmBooking()">✓ Confirmar</button>
         </div>
@@ -614,13 +621,13 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwQPNGHPK9NVu3ubCg7sJLMiB-V6Ds5pXjmTLiQOVNd_GuWquzwGxJqdNC2bimyeQZ2/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
 var CS=[];
 (function(){ for(var i=0;i<8;i++) CS.push({id:String(i+1),name:'Consultorio '+(i+1),color:COLS[i],foto:'',descripcion:''});}());
-var selDate=null,selSS=null,selSE=null,selC=null,calY,calM;
+var selDate=null,selSS=null,selSE=null,selC=null,selUser=null,calY,calM;
 var photoReg='',photoEc='';
 var MONTHS=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 var DOWS=['Do','Lu','Ma','Mi','Ju','Vi','Sa'];
@@ -1043,6 +1050,10 @@ function startSession(user){
   loadBlocked();
   initDR();
   loadRR(function(){renderCal();updateStepper();});
+  // Si es admin, precargar usuarios para el selector de reservas
+  if(user.rol==='admin'){
+    apiPost({action:'getUsers'},function(err,res){if(!err&&res&&res.ok)AU=res.users||[];});
+  }
   // Mostrar dot de avisos si hay avisos nuevos no vistos
   loadAvisosAsync(function(){
     try{
@@ -1230,8 +1241,10 @@ function renderS3(){
   G('cbar').style.display='none';
   var grid=G('consul-grid');grid.innerHTML='';
 
-  /* Si el usuario ya tiene reserva en este horario, no mostrar nada seleccionable */
-  var uc=userConflict(CU.id,selDate,selSS,selSE);
+  /* El admin ve todos los consultorios libres sin restricción de conflicto propio */
+  /* Para usuario normal: bloquear si ya tiene reserva en este horario */
+  var checkUid = (CU.rol==='admin') ? null : CU.id;
+  var uc = checkUid ? userConflict(checkUid,selDate,selSS,selSE) : null;
   if(uc){
     var ucConsul=byId(CS,uc.consulId);
     var msg=mkEl('div');
@@ -1277,23 +1290,57 @@ function pickConsul(c){
   selC=c;renderS3();updateStepper();
   G('cbar-title').textContent=c.name+' · '+fmtH(selSS)+'–'+fmtH(selSE);
   G('cbar-sub').textContent=fmtDateLong(selDate)+' · '+(selSE-selSS)+'h';
+  // Admin: mostrar selector de usuario
+  var wrap=G('cbar-user-wrap');
+  if(CU.rol==='admin'){
+    wrap.style.display='block';
+    var sel=G('cbar-user');
+    sel.innerHTML='';
+    // Opción propia primero
+    var optMe=document.createElement('option');
+    optMe.value=CU.id;optMe.textContent='👤 '+CU.nombre+' (yo)';sel.appendChild(optMe);
+    // Resto de usuarios de AU
+    (AU.length?AU:DU.map(uSafe)).forEach(function(u){
+      if(u.id===CU.id)return;
+      var o=document.createElement('option');o.value=u.id;o.textContent=u.nombre;sel.appendChild(o);
+    });
+    selUser=CU; // default
+    sel.onchange=function(){
+      var uid=sel.value;
+      var found=null;
+      (AU.length?AU:DU.map(uSafe)).forEach(function(u){if(u.id===uid)found=u;});
+      if(!found&&uid===CU.id)found=CU;
+      selUser=found||CU;
+    };
+  } else {
+    wrap.style.display='none';
+    selUser=CU;
+  }
   G('cbar').style.display='flex';
   setTimeout(function(){G('cbar').scrollIntoView({behavior:'smooth',block:'nearest'});},80);
 }
+
 function confirmBooking(){
   if(!CU||!selC||selSS===null||selSE===null||!selDate)return;
+  var bookUser=selUser||CU;
   if(conflict(selC.id,selDate,selSS,selSE)){showToast('Conflicto: consultorio ocupado','err');renderS3();return;}
-  if(userConflict(CU.id,selDate,selSS,selSE)){showToast('Ya tenés una reserva en ese horario','err');renderS3();return;}
+  if(userConflict(bookUser.id,selDate,selSS,selSE)){showToast(bookUser.id===CU.id?'Ya tenés una reserva en ese horario':bookUser.nombre+' ya tiene una reserva en ese horario','err');renderS3();return;}
   var btn=G('confirm-btn');btn.textContent='Guardando...';btn.disabled=true;
   var savedName=selC.name;
-  api({action:'addReservation',userId:CU.id,userName:CU.nombre,consulId:selC.id,fecha:selDate,startH:selSS,endH:selSE},function(err,res){
+  apiPost({action:'addReservation',userId:bookUser.id,userName:bookUser.nombre,consulId:selC.id,fecha:selDate,startH:selSS,endH:selSE},function(err,res){
     btn.textContent='✓ Confirmar';btn.disabled=false;
     if(err||!res.ok){showToast(res&&res.error||'Error','err');return;}
-    RR.push({id:String(res.id),consulId:selC.id,fecha:selDate,startH:selSS,endH:selSE,userId:CU.id,userName:CU.nombre});
-    showToast('✓ Reserva confirmada: '+savedName,'ok');resetAll();
+    RR.push({id:String(res.id),consulId:selC.id,fecha:selDate,startH:selSS,endH:selSE,userId:bookUser.id,userName:bookUser.nombre});
+    showToast('✓ Reserva confirmada: '+savedName+(bookUser.id!==CU.id?' para '+bookUser.nombre:''),'ok');
+    resetAll();
   });
 }
-function resetAll(){selDate=null;selSS=null;selSE=null;selC=null;var n=new Date();calY=n.getFullYear();calM=n.getMonth();renderCal();goStep(1);updateStepper();}
+
+function resetAll(){
+  selDate=null;selSS=null;selSE=null;selC=null;selUser=null;
+  var n=new Date();calY=n.getFullYear();calM=n.getMonth();
+  renderCal();goStep(1);updateStepper();
+}
 
 /* MIS TURNOS */
 function renderMR(){
