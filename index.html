@@ -655,7 +655,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwQPNGHPK9NVu3ubCg7sJLMiB-V6Ds5pXjmTLiQOVNd_GuWquzwGxJqdNC2bimyeQZ2/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -1462,7 +1462,7 @@ function renderAgenda(){
     var tr=mkEl('tr');
     var td0=mkEl('td');td0.innerHTML='<div style="display:flex;align-items:center;gap:6px"><div style="width:8px;height:8px;border-radius:50%;background:'+ccolor+'"></div><strong>'+cname+'</strong></div>';
     var td1=mkEl('td',null,fmtDate(r.fecha));
-    var td2=mkEl('td');td2.innerHTML='<span style="font-family:\'Josefin Sans\',sans-serif;font-size:13px;font-weight:700;color:var(--ink);letter-spacing:.5px">'+fmtH(r.startH)+' – '+fmtH(r.endH)+'</span>';
+    var td2=mkEl('td');td2.innerHTML='<span class="badge badge-acc" style="font-size:12px;white-space:nowrap;letter-spacing:.3px">'+fmtH(r.startH)+'–'+fmtH(r.endH)+'</span>';
     var td3=mkEl('td',null,r.userName);
     var td4=mkEl('td');
     var isOwn=r.userId===CU.id,isAdm=CU.rol==='admin';
