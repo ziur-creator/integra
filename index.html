@@ -279,8 +279,30 @@ input[type=file]{
 .ahora-legend{display:flex;gap:12px;flex-wrap:wrap;background:var(--surf);border-radius:10px;padding:10px 14px;margin-bottom:14px;box-shadow:0 2px 16px rgba(80,40,10,.08)}
 .ahora-leg-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink2)}
 /* AVISOS BADGE */
-.avisos-dot{position:absolute;top:50%;transform:translateY(-50%);right:-13px;width:9px;height:9px;border-radius:50%;background:#ffd4b8;border:1.5px solid var(--acc);display:none}
-.avisos-dot.show{display:block;animation:pulse 2s ease-in-out infinite}
+.avisos-badge{
+  position:absolute;
+  top:-7px;right:-10px;
+  min-width:17px;height:17px;
+  border-radius:9px;
+  background:#e53935;
+  color:#fff;
+  font-size:10px;font-weight:800;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  display:none;
+  align-items:center;justify-content:center;
+  padding:0 4px;
+  border:1.5px solid var(--acc);
+  line-height:1;
+  letter-spacing:0;
+}
+/* AVISOS BANNER */
+.avisos-banner{display:none;align-items:center;gap:10px;background:var(--accL);border:1.5px solid var(--acc2);border-radius:var(--r);padding:11px 14px;margin-bottom:12px;cursor:pointer}
+.avisos-banner.show{display:flex}
+.avisos-banner-icon{font-size:20px;flex-shrink:0}
+.avisos-banner-text{flex:1;min-width:0}
+.avisos-banner-title{font-family:'Josefin Sans',sans-serif;font-size:12px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.5px}
+.avisos-banner-sub{font-size:12px;color:var(--ink2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.avisos-banner-arrow{font-size:16px;color:var(--acc);flex-shrink:0}
 .aviso-card{background:var(--surf);border-radius:var(--r);box-shadow:0 2px 16px rgba(80,40,10,.10);overflow:hidden;margin-bottom:12px;border-left:4px solid var(--acc)}
 .aviso-card.urgente{border-left-color:var(--red)}
 .aviso-card.info{border-left-color:#2980b9}
@@ -433,7 +455,7 @@ input[type=file]{
   <path d="M53,37 L53,10 A27,27 0 0 1 80,37 Z" fill="rgba(255,255,255,0.45)"/>
   <path d="M19,81 L19,94 A13,13 0 0 1 6,81 Z" fill="rgba(255,255,255,0.45)"/>
   <path d="M53,62 L77,62 A24,24 0 0 1 53,86 Z" fill="rgba(255,255,255,0.45)"/>
-</svg><span style="position:relative">INTEGRA <em style="position:relative">MÁS<span class="avisos-dot" id="avisos-dot"></span></em></span></div>
+</svg><span style="position:relative">INTEGRA <em style="position:relative">MÁS<span class="avisos-badge" id="avisos-dot"></span></em></span></div>
     <button class="chip" onclick="openLogout()">
       <div class="chip-av" id="chip-av"></div>
       <span class="chip-name" id="chip-name"></span>
@@ -441,6 +463,14 @@ input[type=file]{
   </div>
   <div class="pcontent" id="pcontent">
     <div class="page on" id="page-reservar">
+      <div class="avisos-banner" id="avisos-banner" onclick="showPage('avisos')">
+        <div class="avisos-banner-icon">📢</div>
+        <div class="avisos-banner-text">
+          <div class="avisos-banner-title">Avisos nuevos</div>
+          <div class="avisos-banner-sub" id="avisos-banner-sub"></div>
+        </div>
+        <div class="avisos-banner-arrow">›</div>
+      </div>
       <div class="stepper">
         <div class="st active" id="si1"><div class="snum">1</div><div class="si"><div class="slbl">Fecha</div><div class="sval" id="sv1">Elegir</div></div></div>
         <div class="sarr">›</div>
@@ -621,7 +651,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwQPNGHPK9NVu3ubCg7sJLMiB-V6Ds5pXjmTLiQOVNd_GuWquzwGxJqdNC2bimyeQZ2/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -655,6 +685,21 @@ function fmtH(h){return pad(parseInt(h))+':00';}
 function byId(arr,id){var s=String(id);for(var i=0;i<arr.length;i++)if(String(arr[i].id)===s)return arr[i];return null;}
 function ini(n){var p=n.trim().split(' '),s=p[0][0].toUpperCase();if(p.length>1)s+=p[p.length-1][0].toUpperCase();return s;}
 function avColor(n){var c=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'],h=0;for(var i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))&0x7fffffff;return c[h%c.length];}
+
+function updateAvisosBadge(){
+  var badge=G('avisos-dot');if(!badge)return;
+  try{
+    var seen=localStorage.getItem('im_avisos_seen');
+    var nuevos=AVISOS.length-(seen!==null?parseInt(seen):0);
+    if(nuevos>0){
+      badge.textContent=nuevos>99?'99+':String(nuevos);
+      badge.style.display='flex';
+    } else {
+      badge.style.display='none';
+      badge.textContent='';
+    }
+  }catch(e){badge.style.display='none';}
+}
 
 function showToast(msg,type){var t=G('toast');t.textContent=msg;t.className='toast '+(type||'ok');t.style.display='block';clearTimeout(t._t);t._t=setTimeout(function(){t.style.display='none';},3000);}
 function setMsg(id,txt,cls){var el=G(id);if(!el)return;if(!txt){el.innerHTML='';return;}var d=document.createElement('div');d.className='amsg '+(cls||'');d.textContent=txt;el.innerHTML='';el.appendChild(d);}
@@ -1056,16 +1101,17 @@ function startSession(user){
   }
   // Mostrar dot de avisos si hay avisos nuevos no vistos
   loadAvisosAsync(function(){
+    updateAvisosBadge();
+    // Toast con delay para no tapar la carga inicial
     try{
       var seen=localStorage.getItem('im_avisos_seen');
-      // Mostrar dot si nunca vio avisos, o si hay más que los vistos
-      if(AVISOS.length>0 && (seen===null || parseInt(seen)<AVISOS.length)){
-        var dot=G('avisos-dot');if(dot)dot.className='avisos-dot show';
+      var nuevos=AVISOS.length-(seen!==null?parseInt(seen):0);
+      if(nuevos>0){
+        setTimeout(function(){
+          showToast('📢 '+(nuevos===1?'Hay un aviso nuevo':'Hay '+nuevos+' avisos nuevos')+' — tocá el logo para ver','ok');
+        },1200);
       }
-    }catch(e){
-      // Si hay avisos, mostrar dot por defecto
-      if(AVISOS.length>0){var dot=G('avisos-dot');if(dot)dot.className='avisos-dot show';}
-    }
+    }catch(e){}
   });
   showPage('reservar');
 }
@@ -2305,7 +2351,8 @@ function renderAvisos(){
   // NO llamar loadAvisos() aquí — usar AVISOS tal como está en memoria
   var pg=G('page-avisos');pg.innerHTML='';
   try{localStorage.setItem('im_avisos_seen', AVISOS.length);}catch(e){}
-  var dot=G('avisos-dot');if(dot)dot.className='avisos-dot';
+  updateAvisosBadge();
+  var banner=G('avisos-banner');if(banner)banner.className='avisos-banner';
 
   // Hero
   var hero=mkEl('div');
