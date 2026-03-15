@@ -614,7 +614,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbybh_vHh5KgEoAS7q8SSdhkzb8u0V2ifS5k8iErElR4bmRj8ltxEXsXN0t8X_Ggn3eW/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -909,6 +909,9 @@ function apiDemo(p,cb){
       for(var ci=0;ci<8;ci++) tempPw+=chars[Math.floor(Math.random()*chars.length)];
       found.pw=hw(tempPw);
       return cb(null,{ok:true,demo:true,tempPw:tempPw});
+    }
+    if(p.action==='setupDemoUsers'){
+      return cb(null,{ok:true,msg:'En modo demo los usuarios ya están cargados.'});
     }
     if(p.action==='getAvisos'){
       // En demo usar AVISOS global directamente
@@ -1383,17 +1386,18 @@ function loadEquipo(){
   var cnt=G('dir-content');
   cnt.innerHTML='<div class="spinner-wrap"><div class="spinner"></div><p>Cargando...</p></div>';
   apiPost({action:'getUsers'},function(err,res){
+    // DEBUG — mostrar exactamente qué devuelve el servidor
+    var dbg='POST: err='+(err?err:'null')+' ok='+(res?res.ok:'?')+' users='+(res&&res.users?res.users.length:'?');
+    showToast(dbg, err||!res||!res.ok ? 'err' : 'ok');
     if(err||!res||!res.ok){
-      // Segundo intento con api() GET como fallback
       api({action:'getUsers'},function(err2,res2){
+        var dbg2='GET: err='+(err2?err2:'null')+' ok='+(res2?res2.ok:'?')+' users='+(res2&&res2.users?res2.users.length:'?');
+        showToast(dbg2, err2||!res2||!res2.ok ? 'err' : 'ok');
         if(err2||!res2||!res2.ok){
-          if(AU&&AU.length){
-            renderEquipoList(cnt,AU);
-          } else {
-            cnt.innerHTML='<div class="empty"><div class="ei">👥</div><h3>No se pudo cargar</h3>'
-              +'<p style="font-size:13px;color:var(--ink3);margin-top:6px">'+(res&&res.error||'Sin conexión')+'</p>'
-              +'<button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="loadEquipo()">↻ Reintentar</button></div>';
-          }
+          if(AU&&AU.length){ renderEquipoList(cnt,AU); }
+          else { cnt.innerHTML='<div class="empty"><div class="ei">👥</div><h3>No se pudo cargar</h3>'
+            +'<p style="font-size:13px;color:var(--ink3);margin-top:6px">'+(res&&res.error||'Sin conexión')+'</p>'
+            +'<button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="loadEquipo()">↻ Reintentar</button></div>'; }
           return;
         }
         AU=res2.users||[];
@@ -1407,18 +1411,30 @@ function loadEquipo(){
 }
 function renderEquipoList(cnt,users){
   cnt.innerHTML='';
-  // Excluir al usuario activo solo si hay otros usuarios
   var others=users.filter(function(u){return String(u.id)!==String(CU.id);});
-  // Si no hay otros, mostrar todos (puede ser que sea el único usuario registrado)
-  var lista = others.length ? others : users;
-  cnt.appendChild(mkEl('div','sec-title','Equipo ('+lista.length+')'));
-  if(!lista.length){
+  cnt.appendChild(mkEl('div','sec-title','Equipo ('+others.length+')'));
+  if(!others.length){
     var e=mkEl('div','empty');
-    e.innerHTML='<div class="ei">👥</div><h3>Sin usuarios registrados</h3>'
-      +'<p style="font-size:13px;color:var(--ink3);margin-top:6px">Aún no hay otros profesionales en el sistema.</p>';
-    cnt.appendChild(e);return;
+    e.innerHTML='<div class="ei">👥</div><h3>Sin otros profesionales</h3>'
+      +'<p style="font-size:13px;color:var(--ink3);margin-top:6px">Todavía no hay otros usuarios registrados.</p>';
+    // En producción mostrar botón para crear usuarios demo
+    if(!isDemo()&&CU.rol==='admin'){
+      var setupBtn=document.createElement('button');
+      setupBtn.className='btn btn-ghost btn-sm';setupBtn.style.marginTop='12px';
+      setupBtn.textContent='⚙ Crear usuarios de prueba';
+      setupBtn.onclick=function(){
+        setupBtn.textContent='Creando...';setupBtn.disabled=true;
+        apiPost({action:'setupDemoUsers'},function(err,res){
+          if(res&&res.ok){showToast('✓ '+res.msg,'ok');loadEquipo();}
+          else{showToast(res&&res.error||'Error','err');setupBtn.textContent='⚙ Crear usuarios de prueba';setupBtn.disabled=false;}
+        });
+      };
+      e.appendChild(setupBtn);
+    }
+    cnt.appendChild(e);
+    return;
   }
-  lista.forEach(function(u){
+  others.forEach(function(u){
     var card=mkEl('div','ucard');
     var top=mkEl('div','ucard-top');top.appendChild(mkAv(u.nombre,u.foto,50));
     var info=mkEl('div','ucard-info');
