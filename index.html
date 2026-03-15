@@ -614,7 +614,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwmdcXr1Hqa1FNIWMZ-MC5fv5vAAz9sjSxCj1r5eIaTP_afBA6c4PjzOqjkw6O0lSs9/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -1043,11 +1043,15 @@ function startSession(user){
   // Mostrar dot de avisos si hay avisos nuevos no vistos
   loadAvisosAsync(function(){
     try{
-      var seen=parseInt(localStorage.getItem('im_avisos_seen')||'0');
-      if(AVISOS.length>0 && seen<AVISOS.length){
+      var seen=localStorage.getItem('im_avisos_seen');
+      // Mostrar dot si nunca vio avisos, o si hay más que los vistos
+      if(AVISOS.length>0 && (seen===null || parseInt(seen)<AVISOS.length)){
         var dot=G('avisos-dot');if(dot)dot.className='avisos-dot show';
       }
-    }catch(e){}
+    }catch(e){
+      // Si hay avisos, mostrar dot por defecto
+      if(AVISOS.length>0){var dot=G('avisos-dot');if(dot)dot.className='avisos-dot show';}
+    }
   });
   showPage('reservar');
 }
@@ -1403,11 +1407,18 @@ function loadEquipo(){
 }
 function renderEquipoList(cnt,users){
   cnt.innerHTML='';
-  // Excluir al usuario activo de la lista
+  // Excluir al usuario activo solo si hay otros usuarios
   var others=users.filter(function(u){return String(u.id)!==String(CU.id);});
-  cnt.appendChild(mkEl('div','sec-title','Equipo ('+others.length+')'));
-  if(!others.length){var e=mkEl('div','empty');e.innerHTML='<div class="ei">👥</div><h3>Sin otros usuarios</h3>';cnt.appendChild(e);return;}
-  others.forEach(function(u){
+  // Si no hay otros, mostrar todos (puede ser que sea el único usuario registrado)
+  var lista = others.length ? others : users;
+  cnt.appendChild(mkEl('div','sec-title','Equipo ('+lista.length+')'));
+  if(!lista.length){
+    var e=mkEl('div','empty');
+    e.innerHTML='<div class="ei">👥</div><h3>Sin usuarios registrados</h3>'
+      +'<p style="font-size:13px;color:var(--ink3);margin-top:6px">Aún no hay otros profesionales en el sistema.</p>';
+    cnt.appendChild(e);return;
+  }
+  lista.forEach(function(u){
     var card=mkEl('div','ucard');
     var top=mkEl('div','ucard-top');top.appendChild(mkAv(u.nombre,u.foto,50));
     var info=mkEl('div','ucard-info');
