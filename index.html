@@ -485,20 +485,10 @@ input[type=file]{
             <select id="cbar-user" style="width:100%;padding:6px 10px;border-radius:8px;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-size:13px;font-family:inherit;-webkit-appearance:none;outline:none">
             </select>
           </div>
-          <!-- Repetir semanas -->
-          <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
-            <span style="font-size:11px;color:rgba(255,255,255,.7);font-family:'Josefin Sans',sans-serif;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap">↻ Repetir</span>
-            <div style="display:flex;gap:4px" id="repeat-weeks-btns">
-              <button onclick="setRepeatWeeks(0)" id="rw-0" class="btn btn-ow btn-sm" style="min-width:36px;font-size:11px">1×</button>
-              <button onclick="setRepeatWeeks(1)" id="rw-1" class="btn btn-ow btn-sm" style="min-width:36px;font-size:11px">+1s</button>
-              <button onclick="setRepeatWeeks(2)" id="rw-2" class="btn btn-ow btn-sm" style="min-width:36px;font-size:11px">+2s</button>
-              <button onclick="setRepeatWeeks(3)" id="rw-3" class="btn btn-ow btn-sm" style="min-width:36px;font-size:11px">+3s</button>
-              <button onclick="setRepeatWeeks(4)" id="rw-4" class="btn btn-ow btn-sm" style="min-width:36px;font-size:11px">+4s</button>
-            </div>
-          </div>
         </div>
-        <div style="display:flex;gap:8px;flex-shrink:0;align-self:flex-start;margin-top:2px">
+        <div style="display:flex;gap:8px;flex-shrink:0">
           <button class="btn btn-ow btn-sm" onclick="resetAll()">✕</button>
+          <button class="btn btn-ow btn-sm" id="repeat-new-btn" onclick="openRepeatNew()" title="Repetir reserva">↻</button>
           <button class="btn btn-white btn-sm" id="confirm-btn" onclick="confirmBooking()">✓ Confirmar</button>
         </div>
       </div>
@@ -643,7 +633,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwQPNGHPK9NVu3ubCg7sJLMiB-V6Ds5pXjmTLiQOVNd_GuWquzwGxJqdNC2bimyeQZ2/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -1478,79 +1468,28 @@ function pickConsul(c){
     selUser=CU;
   }
   G('cbar').style.display='flex';
-  setRepeatWeeks(repeatWeeks); // sync button state
   setTimeout(function(){G('cbar').scrollIntoView({behavior:'smooth',block:'nearest'});},80);
-}
-
-function setRepeatWeeks(n){
-  repeatWeeks=n;
-  [0,1,2,3,4].forEach(function(i){
-    var b=G('rw-'+i);if(!b)return;
-    b.style.background=i===n?'rgba(255,255,255,.35)':'';
-    b.style.fontWeight=i===n?'800':'';
-    b.style.borderColor=i===n?'rgba(255,255,255,.6)':'';
-  });
-  var confirmBtn=G('confirm-btn');
-  if(confirmBtn) confirmBtn.textContent=n>0?'✓ Confirmar ('+(n+1)+'×)':'✓ Confirmar';
 }
 
 function confirmBooking(){
   if(!CU||!selC||selSS===null||selSE===null||!selDate)return;
   var bookUser=selUser||CU;
-
-  // Calcular todas las fechas a reservar
-  var fechas=[selDate];
-  for(var w=1;w<=repeatWeeks;w++){
-    var parts=selDate.split('-');
-    var d=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
-    d.setDate(d.getDate()+7*w);
-    var pad=function(x){return String(x).padStart(2,'0');};
-    fechas.push(d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()));
-  }
-
-  // Verificar conflictos para todas las fechas antes de guardar
-  for(var i=0;i<fechas.length;i++){
-    if(conflict(selC.id,fechas[i],selSS,selSE)){
-      showToast('Conflicto: '+selC.name+' ocupado el '+fmtDate(fechas[i]),'err');
-      return;
-    }
-    if(userConflict(bookUser.id,fechas[i],selSS,selSE)){
-      showToast((bookUser.id===CU.id?'Ya tenés':''+bookUser.nombre+' ya tiene')+' reserva el '+fmtDate(fechas[i]),'err');
-      return;
-    }
-  }
-
+  if(conflict(selC.id,selDate,selSS,selSE)){showToast('Conflicto: consultorio ocupado','err');renderS3();return;}
+  if(userConflict(bookUser.id,selDate,selSS,selSE)){showToast(bookUser.id===CU.id?'Ya tenés una reserva en ese horario':bookUser.nombre+' ya tiene una reserva en ese horario','err');renderS3();return;}
   var btn=G('confirm-btn');btn.textContent='Guardando...';btn.disabled=true;
   var savedName=selC.name;
-  var total=fechas.length;
-  var done=0;var errors=0;
-
-  fechas.forEach(function(fecha){
-    apiPost({action:'addReservation',userId:bookUser.id,userName:bookUser.nombre,consulId:selC.id,fecha:fecha,startH:selSS,endH:selSE},function(err,res){
-      done++;
-      if(err||!res.ok){ errors++; }
-      else {
-        RR.push({id:String(res.id),consulId:selC.id,fecha:fecha,startH:selSS,endH:selSE,userId:bookUser.id,userName:bookUser.nombre});
-      }
-      if(done===total){
-        btn.textContent='✓ Confirmar';btn.disabled=false;
-        updateMRBadge();
-        if(errors>0){
-          showToast('✓ '+(total-errors)+' reservas guardadas, '+errors+' con error','ok');
-        } else {
-          var msg=total>1?'✓ '+total+' reservas confirmadas: '+savedName:'✓ Reserva confirmada: '+savedName;
-          if(bookUser.id!==CU.id) msg+=' para '+bookUser.nombre;
-          showToast(msg,'ok');
-        }
-        resetAll();
-      }
-    });
+  apiPost({action:'addReservation',userId:bookUser.id,userName:bookUser.nombre,consulId:selC.id,fecha:selDate,startH:selSS,endH:selSE},function(err,res){
+    btn.textContent='✓ Confirmar';btn.disabled=false;
+    if(err||!res.ok){showToast(res&&res.error||'Error','err');return;}
+    RR.push({id:String(res.id),consulId:selC.id,fecha:selDate,startH:selSS,endH:selSE,userId:bookUser.id,userName:bookUser.nombre});
+    updateMRBadge();
+    showToast('✓ Reserva confirmada: '+savedName+(bookUser.id!==CU.id?' para '+bookUser.nombre:''),'ok');
+    resetAll();
   });
 }
 
 function resetAll(){
   selDate=null;selSS=null;selSE=null;selC=null;selUser=null;repeatWeeks=0;
-  setRepeatWeeks(0);
   var n=new Date();calY=n.getFullYear();calM=n.getMonth();
   renderCal();goStep(1);updateStepper();
 }
@@ -1965,9 +1904,26 @@ function openRepeat(rid){
   var r = byId(RR, rid);
   if(!r) return;
   repeatSource = r;
+  repeatSource._isNew = false;
   var c = byId(CS, r.consulId);
   G('rpt-rid').value = rid;
   G('rpt-desc').textContent = (c?c.name:'Consultorio '+r.consulId) + ' · ' + fmtH(r.startH) + '–' + fmtH(r.endH) + ' · ' + fmtDate(r.fecha);
+  setMsg('rpt-msg','');
+  updateRepeatPreview();
+  openModal('modal-repeat');
+}
+
+function openRepeatNew(){
+  if(!selC||selSS===null||selSE===null||!selDate) return;
+  repeatSource = {
+    _isNew: true,
+    consulId: selC.id,
+    fecha: selDate,
+    startH: selSS,
+    endH: selSE
+  };
+  G('rpt-rid').value = '';
+  G('rpt-desc').textContent = selC.name + ' · ' + fmtH(selSS) + '–' + fmtH(selSE) + ' · ' + fmtDateLong(selDate);
   setMsg('rpt-msg','');
   updateRepeatPreview();
   openModal('modal-repeat');
@@ -2021,27 +1977,28 @@ function doRepeat(){
     return !isBlocked(d) && !conflict_any(repeatSource.consulId, d, repeatSource.startH, repeatSource.endH);
   });
   if(!toCreate.length){ setMsg('rpt-msg','No hay fechas disponibles para reservar','err'); return; }
+
+  var bookUser = repeatSource._isNew ? (selUser||CU) : CU;
+
   setMsg('rpt-msg','Creando '+toCreate.length+' reservas...','');
-  // Enviar todas las fechas en UNA sola llamada — el backend manda un solo email resumen
   api({action:'addReservationBatch',
-    userId:CU.id, userName:CU.nombre,
+    userId:bookUser.id, userName:bookUser.nombre,
     consulId:repeatSource.consulId,
     fechas:toCreate.join('|'),
     startH:repeatSource.startH, endH:repeatSource.endH},
   function(err,res){
     if(err||!res.ok){ setMsg('rpt-msg',res&&res.error||'Error al crear reservas','err'); return; }
     var creadas = res.creadas || toCreate;
-    // Actualizar RR local
     creadas.forEach(function(d){
       RR.push({id:'r'+Date.now()+Math.random(), consulId:String(repeatSource.consulId), fecha:d,
         startH:parseInt(repeatSource.startH), endH:parseInt(repeatSource.endH),
-        userId:String(CU.id), userName:CU.nombre});
+        userId:String(bookUser.id), userName:bookUser.nombre});
     });
     var errores = res.errores ? res.errores.length : 0;
     closeModal('modal-repeat');
+    updateMRBadge();
     showToast('✓ '+creadas.length+' reservas creadas'+(errores?' ('+errores+' omitidas)':''),'ok');
-    loadRR(renderMR);
-    renderCal();
+    if(repeatSource._isNew){ resetAll(); } else { loadRR(renderMR); renderCal(); }
   });
 }
 
