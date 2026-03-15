@@ -487,7 +487,7 @@ input[type=file]{
           </div>
         </div>
         <div style="display:flex;gap:8px;flex-shrink:0">
-          <button class="btn btn-ow btn-sm" onclick="resetAll()">✕</button>
+          <button class="btn btn-ow btn-sm" onclick="cancelBooking()">✕</button>
           <button class="btn btn-ow btn-sm" id="repeat-new-btn" onclick="openRepeatNew()" title="Repetir reserva">↻</button>
           <button class="btn btn-white btn-sm" id="confirm-btn" onclick="confirmBooking()">✓ Confirmar</button>
         </div>
@@ -633,7 +633,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwQPNGHPK9NVu3ubCg7sJLMiB-V6Ds5pXjmTLiQOVNd_GuWquzwGxJqdNC2bimyeQZ2/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -1205,14 +1205,15 @@ function renderHome(){
 
   // Accesos rápidos
   body.appendChild(mkEl('div','sec-title','Accesos rápidos'));
-  var grid=mkEl('div');grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px';
   var tiles=[
-    {icon:'📅',label:'Nueva reserva',page:'reservar',color:'var(--accL)'},
-    {icon:'📋',label:'Mis turnos',page:'misreservas',color:'var(--surf2)'},
-    {icon:'🟢',label:'Ahora',page:'ahora',color:'var(--surf2)'},
-    {icon:'👥',label:'Equipo',page:'equipo',color:'var(--surf2)'}
+    {icon:'📅',label:'Nueva reserva',page:'reservar'},
+    {icon:'📋',label:'Mis turnos',page:'misreservas'},
+    {icon:'🕐',label:'Agenda',page:'agenda'},
+    {icon:'🟢',label:'Ahora',page:'ahora'},
+    {icon:'👥',label:'Equipo',page:'equipo'}
   ];
-  if(CU.rol==='admin') tiles[3]={icon:'⚙️',label:'Administración',page:'admin',color:'var(--surf2)'};
+  if(CU.rol==='admin') tiles.push({icon:'⚙️',label:'Admin',page:'admin'});
+  var grid=mkEl('div');grid.style.cssText='display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:10px';
   tiles.forEach(function(t,idx){
     var tile=mkEl('div');
     tile.style.cssText='background:var(--surf);border-radius:var(--r);box-shadow:0 2px 16px rgba(80,40,10,.10);padding:16px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:transform .15s,opacity .15s;-webkit-tap-highlight-color:transparent;opacity:0;transform:translateY(14px)';
@@ -1488,10 +1489,14 @@ function confirmBooking(){
   });
 }
 
-function resetAll(){
+function cancelBooking(){
   selDate=null;selSS=null;selSE=null;selC=null;selUser=null;repeatWeeks=0;
   var n=new Date();calY=n.getFullYear();calM=n.getMonth();
   renderCal();goStep(1);updateStepper();
+}
+function resetAll(){
+  cancelBooking();
+  showPage('home');
 }
 
 /* MIS TURNOS */
