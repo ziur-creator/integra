@@ -633,7 +633,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwgw_8vcXLb4MXXYXelrN96tu2E3GOv6ylJDW-pIXEUrHJN5ecV8xTC_o6UoCCJqpw/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -1203,7 +1203,7 @@ function renderHome(){
     body.appendChild(prox);
   }
 
-  // Accesos rápidos — filas badge estilo agenda
+  // Accesos rápidos — burbujas alargadas
   body.appendChild(mkEl('div','sec-title','Accesos rápidos'));
   var tiles=[
     {icon:'📅',label:'Nueva reserva',page:'reservar'},
@@ -1213,22 +1213,21 @@ function renderHome(){
     {icon:'👥',label:'Equipo',page:'equipo'}
   ];
   if(CU.rol==='admin') tiles.push({icon:'⚙️',label:'Admin',page:'admin'});
-  var list=mkEl('div');list.style.cssText='display:flex;flex-direction:column;gap:0;margin-top:10px;background:var(--surf);border-radius:var(--r);overflow:hidden;box-shadow:0 2px 16px rgba(80,40,10,.10)';
+  var list=mkEl('div');list.style.cssText='display:flex;flex-direction:column;gap:8px;margin-top:10px';
   tiles.forEach(function(t,idx){
     var row=mkEl('div');
-    var borderTop=idx>0?'border-top:1px solid var(--brd);':'';
-    row.style.cssText='display:flex;align-items:center;gap:12px;padding:13px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .12s;opacity:0;transform:translateX(-10px);'+borderTop;
-    row.innerHTML='<span style="font-size:20px;flex-shrink:0;width:28px;text-align:center">'+t.icon+'</span>'
-      +'<span style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--ink);flex:1">'+t.label+'</span>'
-      +'<span style="font-size:14px;color:var(--ink3)">›</span>';
-    row.ontouchstart=function(){this.style.background='var(--accL)';};
-    row.ontouchend=function(){this.style.background='';};
+    row.style.cssText='display:flex;align-items:center;gap:13px;padding:13px 18px;cursor:pointer;-webkit-tap-highlight-color:transparent;background:rgba(224,120,48,.13);border-radius:40px;border:1.5px solid rgba(224,120,48,.22);transition:background .12s,transform .12s;opacity:0;transform:scale(0.6)';
+    row.innerHTML='<span style="font-size:19px;flex-shrink:0;width:26px;text-align:center">'+t.icon+'</span>'
+      +'<span style="font-family:\'Josefin Sans\',sans-serif;font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--ink);flex:1">'+t.label+'</span>'
+      +'<span style="font-size:15px;color:var(--acc);font-weight:700;opacity:.6">›</span>';
+    row.ontouchstart=function(){this.style.background='rgba(224,120,48,.28)';this.style.transform='scale(.97)';};
+    row.ontouchend=function(){this.style.background='rgba(224,120,48,.13)';this.style.transform='';};
     (function(page){row.onclick=function(){showPage(page);};})(t.page);
     (function(el,delay){
       setTimeout(function(){
-        el.style.transition='opacity .25s ease, transform .25s ease';
+        el.style.transition='opacity .28s ease, transform .28s cubic-bezier(.34,1.56,.64,1)';
         el.style.opacity='1';
-        el.style.transform='translateX(0)';
+        el.style.transform='scale(1)';
       }, 80 + delay * 55);
     })(row, idx);
     list.appendChild(row);
