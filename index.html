@@ -614,7 +614,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwD7KQLVyH-EJX2PIrzWd86S5__Ru1BW6ofbpgED9EhUQ494jT2hna0ITHpbjq35nFD/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -902,7 +902,6 @@ function apiDemo(p,cb){
       return cb(null,{ok:true}); // en demo siempre ok
     }
     if(p.action==='recoverPassword'){
-      // Modo demo: simular recuperación mostrando la contraseña en pantalla
       var found = null;
       for(var di=0;di<DU.length;di++){if(DU[di].email.toLowerCase()===(p.email||'').toLowerCase()){found=DU[di];break;}}
       if(!found) return cb(null,{ok:false,error:'No encontramos una cuenta con ese email'});
@@ -910,6 +909,23 @@ function apiDemo(p,cb){
       for(var ci=0;ci<8;ci++) tempPw+=chars[Math.floor(Math.random()*chars.length)];
       found.pw=hw(tempPw);
       return cb(null,{ok:true,demo:true,tempPw:tempPw});
+    }
+    if(p.action==='getAvisos'){
+      // En demo usar AVISOS global directamente
+      var avisos=AVISOS.map(function(a,i){return{id:a.id||'a'+i,tipo:a.tipo,titulo:a.titulo,texto:a.texto,fecha:a.fecha};});
+      return cb(null,{ok:true,avisos:avisos});
+    }
+    if(p.action==='addAviso'){
+      var na={id:'a'+Date.now(),tipo:p.tipo||'general',titulo:p.titulo,texto:p.texto,fecha:p.fecha||''};
+      AVISOS.unshift(na);
+      saveDemoAvisos();
+      return cb(null,{ok:true,id:na.id});
+    }
+    if(p.action==='deleteAviso'){
+      var aid=String(p.id);
+      for(var ai=0;ai<AVISOS.length;ai++){if(String(AVISOS[ai].id)===aid){AVISOS.splice(ai,1);break;}}
+      saveDemoAvisos();
+      return cb(null,{ok:true});
     }
     cb(null,{ok:false,error:'Acción desconocida'});
   },180);
@@ -1025,13 +1041,14 @@ function startSession(user){
   initDR();
   loadRR(function(){renderCal();updateStepper();});
   // Mostrar dot de avisos si hay avisos nuevos no vistos
-  try{
-    loadAvisos();
-    var seen=parseInt(localStorage.getItem('im_avisos_seen')||'0');
-    if(AVISOS.length>0 && seen<AVISOS.length){
-      var dot=G('avisos-dot');if(dot)dot.className='avisos-dot show';
-    }
-  }catch(e){}
+  loadAvisosAsync(function(){
+    try{
+      var seen=parseInt(localStorage.getItem('im_avisos_seen')||'0');
+      if(AVISOS.length>0 && seen<AVISOS.length){
+        var dot=G('avisos-dot');if(dot)dot.className='avisos-dot show';
+      }
+    }catch(e){}
+  });
   showPage('reservar');
 }
 function saveLocal(){try{localStorage.setItem('im_user',JSON.stringify(CU));}catch(e){}}
@@ -1076,7 +1093,11 @@ function showPage(name){
   if(name==='equipo')loadEquipo();
   if(name==='perfil')renderPerfil();
   if(name==='admin')loadAdmin();
-  if(name==='avisos')renderAvisos();
+  if(name==='avisos'){
+    loadAvisosAsync(function(){
+      renderAvisos();
+    });
+  }
 }
 
 /* DATOS */
@@ -2120,111 +2141,115 @@ function doRecovery(){
    tipo: 'urgente' | 'info' | 'ok' | 'general'
    ═══════════════════════════════════════════════════════════ */
 var AVISOS_DEFAULT = [
-  {
-    tipo: 'urgente',
-    titulo: 'Mantenimiento programado',
-    texto: 'El martes 18 de marzo de 9:00 a 11:00 hs no habrá acceso a los consultorios del primer piso por trabajos de electricidad. Por favor reprogramá tus turnos con anticipación.',
-    fecha: '14 mar 2026'
-  },
-  {
-    tipo: 'info',
-    titulo: 'Nuevos horarios de recepción',
-    texto: 'A partir del lunes 16 de marzo la recepción abre de 7:30 a 20:00 hs de lunes a viernes, y de 8:00 a 14:00 hs los sábados.',
-    fecha: '10 mar 2026'
-  },
-  {
-    tipo: 'ok',
-    titulo: 'Sistema de reservas actualizado',
-    texto: 'Se actualizó el sistema de reservas. Ahora podés ver en tiempo real qué consultorios están disponibles desde la pestaña Ahora.',
-    fecha: '5 mar 2026'
-  },
-  {
-    tipo: 'general',
-    titulo: 'Recordatorio: limpieza de consultorios',
-    texto: 'Recordamos que al finalizar cada turno es necesario dejar el consultorio en condiciones: descartables en el tacho, camilla con papel nuevo y equipamiento en su lugar.',
-    fecha: '1 mar 2026'
-  }
+  {id:'ad1',tipo:'urgente',titulo:'Mantenimiento programado',texto:'El martes 18 de marzo de 9:00 a 11:00 hs no habrá acceso a los consultorios del primer piso por trabajos de electricidad. Por favor reprogramá tus turnos con anticipación.',fecha:'14 mar 2026'},
+  {id:'ad2',tipo:'info',titulo:'Nuevos horarios de recepción',texto:'A partir del lunes 16 de marzo la recepción abre de 7:30 a 20:00 hs de lunes a viernes, y de 8:00 a 14:00 hs los sábados.',fecha:'10 mar 2026'},
+  {id:'ad3',tipo:'ok',titulo:'Sistema de reservas actualizado',texto:'Se actualizó el sistema de reservas. Ahora podés ver en tiempo real qué consultorios están disponibles desde la pestaña Ahora.',fecha:'5 mar 2026'},
+  {id:'ad4',tipo:'general',titulo:'Recordatorio: limpieza de consultorios',texto:'Recordamos que al finalizar cada turno es necesario dejar el consultorio en condiciones: descartables en el tacho, camilla con papel nuevo y equipamiento en su lugar.',fecha:'1 mar 2026'}
 ];
 var AVISOS = [];
-function loadAvisos(){
-  try{
-    var s=localStorage.getItem('im_avisos');
-    AVISOS = s ? JSON.parse(s) : AVISOS_DEFAULT.slice();
-  }catch(e){ AVISOS = AVISOS_DEFAULT.slice(); }
+
+function saveDemoAvisos(){
+  try{localStorage.setItem('im_avisos',JSON.stringify(AVISOS));}catch(e){}
 }
-function saveAvisos(){
-  try{localStorage.setItem('im_avisos', JSON.stringify(AVISOS));}catch(e){}
+function loadAvisos(){
+  // En producción: cargar desde backend. En demo: usar localStorage con fallback a defaults.
+  if(isDemo()){
+    try{
+      var s=localStorage.getItem('im_avisos');
+      if(s){var p=JSON.parse(s);if(Array.isArray(p)&&p.length){AVISOS=p;return;}}
+    }catch(e){}
+    AVISOS=AVISOS_DEFAULT.map(function(a){return{id:a.id,tipo:a.tipo,titulo:a.titulo,texto:a.texto,fecha:a.fecha};});
+    return;
+  }
+  // Producción: no cargar síncronamente, se carga en startSession con callback
+}
+
+function loadAvisosAsync(cb){
+  apiPost({action:'getAvisos'},function(err,res){
+    if(!err&&res&&res.ok&&Array.isArray(res.avisos)){
+      AVISOS=res.avisos;
+    } else if(!AVISOS.length){
+      AVISOS=AVISOS_DEFAULT.map(function(a){return{id:a.id,tipo:a.tipo,titulo:a.titulo,texto:a.texto,fecha:a.fecha};});
+    }
+    if(cb)cb();
+  });
+}
+
+function publishAviso(){
+  var tipo=G('nav-tipo').value;
+  var titulo=(G('nav-titulo').value||'').trim();
+  var texto=(G('nav-texto').value||'').trim();
+  if(!titulo||!texto){setMsg('nav-msg','Completá título y texto','err');return;}
+  var d=new Date();
+  var meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  var fechaStr=d.getDate()+' '+meses[d.getMonth()]+' '+d.getFullYear();
+  setMsg('nav-msg','Publicando...','');
+  apiPost({action:'addAviso',adminId:CU.id,tipo:tipo,titulo:titulo,texto:texto,fecha:fechaStr},function(err,res){
+    if(err||!res.ok){setMsg('nav-msg',res&&res.error||'Error al publicar','err');return;}
+    G('nav-titulo').value='';G('nav-texto').value='';
+    // Actualizar AVISOS local y re-render
+    AVISOS.unshift({id:String(res.id||Date.now()),tipo:tipo,titulo:titulo,texto:texto,fecha:fechaStr});
+    try{localStorage.setItem('im_avisos_seen','0');}catch(e){}
+    showToast('✓ Aviso publicado','ok');
+    renderAvisos();
+  });
+}
+
+function deleteAviso(id){
+  if(!confirm('¿Eliminar este aviso?'))return;
+  apiPost({action:'deleteAviso',adminId:CU.id,id:id},function(err,res){
+    if(err||!res.ok){showToast(res&&res.error||'Error al eliminar','err');return;}
+    AVISOS=AVISOS.filter(function(a){return String(a.id)!==String(id);});
+    showToast('Aviso eliminado','ok');
+    renderAvisos();
+  });
 }
 
 function renderAvisos(){
-  loadAvisos();
+  // NO llamar loadAvisos() aquí — usar AVISOS tal como está en memoria
   var pg=G('page-avisos');pg.innerHTML='';
-  // Marcar como vistos
   try{localStorage.setItem('im_avisos_seen', AVISOS.length);}catch(e){}
   var dot=G('avisos-dot');if(dot)dot.className='avisos-dot';
 
-  // Hero header
+  // Hero
   var hero=mkEl('div');
   hero.style.cssText='background:var(--acc);margin:-14px -14px 16px;padding:22px 18px 18px;';
   hero.innerHTML='<div style="font-family:\'Josefin Sans\',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-bottom:4px">Tablón de</div>'
     +'<div style="font-family:\'Josefin Sans\',sans-serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:1px">Avisos</div>';
   pg.appendChild(hero);
 
-  // Formulario de creación (solo admin)
+  // Formulario admin
   if(CU && CU.rol==='admin'){
-    var formCard=mkEl('div','card');
-    formCard.style.marginBottom='14px';
-    var fch=mkEl('div','ch');
-    fch.innerHTML='<div><h3>✚ Nuevo aviso</h3></div>';
-    formCard.appendChild(fch);
+    var formCard=mkEl('div','card');formCard.style.marginBottom='14px';
+    var fch=mkEl('div','ch');fch.innerHTML='<div><h3>✚ Nuevo aviso</h3></div>';formCard.appendChild(fch);
     var fcb=mkEl('div','cb');
     // Tipo
-    var ftipoWrap=mkEl('div','fld');
-    ftipoWrap.innerHTML='<label>Tipo</label>';
-    var fsel=mkEl('select');fsel.id='nav-tipo';fsel.className='fld input';
-    fsel.style.cssText='width:100%;padding:10px 14px;border:1.5px solid var(--brd);border-radius:10px;font-size:14px;background:#fff;-webkit-appearance:none';
+    var ftipoWrap=mkEl('div','fld');ftipoWrap.innerHTML='<label>Tipo</label>';
+    var fsel=document.createElement('select');fsel.id='nav-tipo';
+    fsel.style.cssText='width:100%;padding:10px 14px;border:1.5px solid var(--brd);border-radius:10px;font-size:14px;background:#fff;-webkit-appearance:none;outline:none';
     [{v:'general',l:'📢 General'},{v:'urgente',l:'⚠ Urgente'},{v:'info',l:'ℹ Info'},{v:'ok',l:'✓ Novedad'}].forEach(function(o){
       var opt=document.createElement('option');opt.value=o.v;opt.textContent=o.l;fsel.appendChild(opt);
     });
     ftipoWrap.appendChild(fsel);fcb.appendChild(ftipoWrap);
     // Título
-    var ftitWrap=mkEl('div','fld');
-    ftitWrap.innerHTML='<label>Título</label>';
-    var ftit=mkEl('input');ftit.id='nav-titulo';ftit.type='text';ftit.placeholder='Título del aviso';
-    ftit.style.cssText='width:100%;padding:10px 14px;border:1.5px solid var(--brd);border-radius:10px;font-size:14px';
+    var ftitWrap=mkEl('div','fld');ftitWrap.innerHTML='<label>Título</label>';
+    var ftit=document.createElement('input');ftit.id='nav-titulo';ftit.type='text';ftit.placeholder='Título del aviso';
+    ftit.style.cssText='width:100%;padding:10px 14px;border:1.5px solid var(--brd);border-radius:10px;font-size:14px;outline:none';
     ftitWrap.appendChild(ftit);fcb.appendChild(ftitWrap);
     // Texto
-    var ftxtWrap=mkEl('div','fld');
-    ftxtWrap.innerHTML='<label>Texto</label>';
+    var ftxtWrap=mkEl('div','fld');ftxtWrap.innerHTML='<label>Texto</label>';
     var ftxt=document.createElement('textarea');ftxt.id='nav-texto';ftxt.placeholder='Escribí el aviso aquí...';
-    ftxt.style.cssText='width:100%;padding:10px 14px;border:1.5px solid var(--brd);border-radius:10px;font-size:14px;min-height:90px;resize:vertical;font-family:inherit';
+    ftxt.style.cssText='width:100%;padding:10px 14px;border:1.5px solid var(--brd);border-radius:10px;font-size:14px;min-height:90px;resize:vertical;font-family:inherit;outline:none';
     ftxtWrap.appendChild(ftxt);fcb.appendChild(ftxtWrap);
-    // Msg
     var fmsg=mkEl('div');fmsg.id='nav-msg';fcb.appendChild(fmsg);
-    // Botón
-    fcb.appendChild(mkBtn('btn btn-pri btn-full','Publicar aviso',function(){
-      var tipo=G('nav-tipo').value;
-      var titulo=(G('nav-titulo').value||'').trim();
-      var texto=(G('nav-texto').value||'').trim();
-      if(!titulo||!texto){setMsg('nav-msg','Completá título y texto','err');return;}
-      var d=new Date();
-      var meses=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-      var fechaStr=d.getDate()+' '+meses[d.getMonth()]+' '+d.getFullYear();
-      AVISOS.unshift({tipo:tipo,titulo:titulo,texto:texto,fecha:fechaStr});
-      saveAvisos();
-      // Actualizar dot para otros usuarios
-      try{localStorage.setItem('im_avisos_seen','0');}catch(e){}
-      G('nav-titulo').value='';G('nav-texto').value='';
-      setMsg('nav-msg','✓ Aviso publicado','ok');
-      setTimeout(function(){renderAvisos();},500);
-    }));
-    formCard.appendChild(fcb);
-    pg.appendChild(formCard);
+    var pbtn=mkBtn('btn btn-pri btn-full','Publicar aviso',publishAviso);
+    fcb.appendChild(pbtn);formCard.appendChild(fcb);pg.appendChild(formCard);
   }
 
   if(!AVISOS.length){
     var e=mkEl('div','empty');e.innerHTML='<div class="ei">📢</div><h3>Sin avisos por ahora</h3>';pg.appendChild(e);return;
   }
+
   AVISOS.forEach(function(a,idx){
     var card=mkEl('div','aviso-card '+(a.tipo||'general'));
     var head=mkEl('div','aviso-head');
@@ -2234,18 +2259,15 @@ function renderAvisos(){
     card.appendChild(head);
     var body=mkEl('div','aviso-body');
     body.appendChild(document.createTextNode(a.texto));
-    if(a.fecha){body.appendChild(mkEl('div','aviso-date',a.fecha));}
-    // Botón eliminar solo para admin
+    if(a.fecha) body.appendChild(mkEl('div','aviso-date',a.fecha));
     if(CU&&CU.rol==='admin'){
-      var del=mkBtn('btn btn-danger btn-sm','✕ Eliminar',function(i){return function(){
-        if(!confirm('¿Eliminar este aviso?'))return;
-        AVISOS.splice(i,1);saveAvisos();renderAvisos();
-      };}(idx));
-      del.style.marginTop='8px';
+      var del=document.createElement('button');
+      del.className='btn btn-danger btn-sm';del.textContent='✕ Eliminar';del.style.marginTop='8px';
+      del.setAttribute('data-id', String(a.id));
+      del.onclick=function(){deleteAviso(this.getAttribute('data-id'));};
       body.appendChild(del);
     }
-    card.appendChild(body);
-    pg.appendChild(card);
+    card.appendChild(body);pg.appendChild(card);
   });
 }
 
