@@ -281,19 +281,20 @@ input[type=file]{
 /* AVISOS BADGE */
 .avisos-badge{
   position:absolute;
-  top:-7px;right:-10px;
-  min-width:17px;height:17px;
-  border-radius:9px;
+  top:-9px;right:-12px;
+  min-width:20px;height:20px;
+  border-radius:10px;
   background:#e53935;
   color:#fff;
-  font-size:10px;font-weight:800;
+  font-size:12px;font-weight:800;
   font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   display:none;
   align-items:center;justify-content:center;
-  padding:0 4px;
-  border:1.5px solid var(--acc);
+  padding:0 5px;
+  border:2px solid #c25a00;
   line-height:1;
   letter-spacing:0;
+  box-shadow:0 1px 4px rgba(0,0,0,.25);
 }
 /* AVISOS BANNER */
 .avisos-banner{display:none;align-items:center;gap:10px;background:var(--accL);border:1.5px solid var(--acc2);border-radius:var(--r);padding:11px 14px;margin-bottom:12px;cursor:pointer}
@@ -651,7 +652,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwQPNGHPK9NVu3ubCg7sJLMiB-V6Ds5pXjmTLiQOVNd_GuWquzwGxJqdNC2bimyeQZ2/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -702,6 +703,7 @@ function updateAvisosBadge(){
 }
 
 function showToast(msg,type){var t=G('toast');t.textContent=msg;t.className='toast '+(type||'ok');t.style.display='block';clearTimeout(t._t);t._t=setTimeout(function(){t.style.display='none';},3000);}
+function showToastLong(msg,type){var t=G('toast');t.textContent=msg;t.className='toast '+(type||'ok');t.style.display='block';clearTimeout(t._t);t._t=setTimeout(function(){t.style.display='none';},6000);}
 function setMsg(id,txt,cls){var el=G(id);if(!el)return;if(!txt){el.innerHTML='';return;}var d=document.createElement('div');d.className='amsg '+(cls||'');d.textContent=txt;el.innerHTML='';el.appendChild(d);}
 function closeModal(id){G(id).className='modal-ov hide';}
 function openModal(id){G(id).className='modal-ov';}
@@ -1108,7 +1110,7 @@ function startSession(user){
       var nuevos=AVISOS.length-(seen!==null?parseInt(seen):0);
       if(nuevos>0){
         setTimeout(function(){
-          showToast('📢 '+(nuevos===1?'Hay un aviso nuevo':'Hay '+nuevos+' avisos nuevos')+' — tocá el logo para ver','ok');
+          showToastLong('📢 '+(nuevos===1?'Hay un aviso nuevo':'Hay '+nuevos+' avisos nuevos')+' — tocá el logo para ver','ok');
         },1200);
       }
     }catch(e){}
