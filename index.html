@@ -2,11 +2,17 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Integra Más">
-<meta name="theme-color" content="#c25a00">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="Integra Más">
+<meta name="theme-color" content="#c25a00" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1a1108" media="(prefers-color-scheme: dark)">
+<meta name="msapplication-TileColor" content="#c25a00">
+<meta name="format-detection" content="telephone=no">
+<meta name="HandheldFriendly" content="true">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@300;400;600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
@@ -15,7 +21,7 @@
 <title>Integra Más</title>
 <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMAAAADACAYAAABS3GwHAAAF90lEQVR4nO3d0XXbOBBG4YGPXzfVpIwtSkWljFSzWwD2IZZXlikSAAEQM//9HpMc24ecS4CUrCS7WM45X/0z4DoppXTp95/9DRl47JkdxJRvxtCjxYwYhn4DBh89jAxhyBdm8DHCiBC6fkEGHzP0DKHLF2LwcYUeIbyd/QIMP67SY/ZOBcDw42pnZ7BpCWHwsaKWLVH1CsDwY1Uts1kVAMOP1dXOaHEADD+8qJnVogAYfnhTOrOnH4MCnh0GwNUfXpXM7m4ADD+8O5rhlwEw/Ihib5a5B4C0zVfOplz9bzsv2t3EF5+9Y/P5b8SPUYOtV4rfp/4EJScWZbaOJVFU+xbAkKs/gz/H43Emhm9yzvl5FRi7AjD41yGGIl8C6Hb1Z/DXQgyfnleB/k+BGP613RLn6MFnAF2u/hxYP4RDeJz1fiuA6MF0T/y89QlA/CC6J7wavJmd3P6IHriQhM7lfeZ5KwS+ElsNzgUgdKDkiJzb9gBEDpA0gXP8xtuesStwBDnn3LYCBD4o2BD4fHMTjDJBI6gPIOiBQIGA554VAHWCRUAAqBcogrm/Eabo54/9v//9z5yfo7dbCvHW6roAApW/jOdAPAURIAK2QKs5WjHQFQHgHOe7AgKANALAeY5XAQJAH04jqHwK5PuOH3jG6wCvlDyN8fTIcgaHj0UJ4I7Hj5K0A2Do+3O2CmgGwODjg9ZToJ8/GP4ZHD0R0lgBGHq8EHsF4Ip/HSerQNwAGHwUiBkAw49CsQJgy7MWB9ugOAEw+GgQIwCGH438B8Dwr23xbZDvABh+nOQ3AIYfHfgNAOjAZwBc/dGJvwAYfn8WvhH2FQDDj858BQB05icArv4YwEcADD8G8REAMMj6AXD1x0DrBwAMRACQtvYvxatuf379dfVP8L/gn37HCoB9wS9C6wYQ/MBjDesGAExAAJC2ZgBsf9YS+HysGQAwCQFAGgFAGgFA2noBBL7hwnrWCwCYiABQJujKTACQRgCQRgCQRgCQlnLOfv5XY6AzVgBIIwBIIwBIIwBIIwBIIwBIIwBIW/uDsczWfhNWyYdGrfzzHwn+oVhmrAAQRwCQRgCQRgCQRgCQRgCQRgDYJvAI1MxDACInAtdYPwBgIAKANAKANALAd0L3XT4CEDohmMtHAMAgfgJgFcAAfgLAHGIXGl8BiJ0cjOcrAIwleIEhAEjzF4DgVQrj+AvAjAhGED2m638qhKK//53/PW+p09fx9WHjPlcAM9krFvryG4AZEeA03wGYEQFO8R+AGRGgWYwAzIgATeIEADSIFQCrACrFCsCMCFAlXgBmRHAVZy+CmUUNwOxPBISAA3EDuCME7IgfwB0RYINOAGasBiM53P+bqQVwRwj4oP126McIPP9ndmimHcAjYmjndPtjRgDbtrZHRBESAZTinmGb46u/mepNMPCBACCNANDO+fbHjADQKsDwmxEAxPEUaBWPT5l6fUYPDhHADNEeoQbZ/pixBRqP4V8aAUAaWyCUCXblv2MFgDQCwLGgV38zAsCRwMNvRgDYE3z4zQgArwgMvxkBYIvI8JsRAJ4JDb9Z7esAs96jInYSliF43HkhDJKDf8cWSJ3w8JuxAugSH/w7VgBFDP+n95RSyjlzRBQw+F+klFLdCsAB9OmWOXcvcA8QFQNfhACiYfCrvJv92QsV3wfcMr+0vRIGvklKKZmxAvjAkA/zeSmvfhI0chXghGOw+wrw9vwHQHSPs84LYZD2JYCqVYBtChx6nvFzKwARwLlvAVTfCxABnNiabe4BIG0zAFYBRPNqpvutAEQAh14G0PS6AO86xIL2Znl3BWh+cYwIsIijGT7cAhEBvCqZ3bFvhnuMgHeQYkFFN8Fd3ifE/QEmKp3ZqsHu/rvDr1YFQsEJNRfs6is7v0CPldXuVqpfB+Bt01hVy2yeGmZWA6zgzEX51CvBrAa42tkZPP1WCCLAVXrMXtfhZUuEGXpedIdcvQkBI4zYbQzdvhACehi5zZ6yfycEtJhxfzn9BpYYsGf2Q5XLn+AQhLarnyL+BxyJjauMaauhAAAAAElFTkSuQmCC">
 <link rel="apple-touch-icon" href="data:image/png;base64,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">
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" id="pwa-manifest">
 <style>
 :root{
   --bg:#fdf6f0;--surf:#fff;--surf2:#f5ece3;
@@ -37,6 +43,11 @@
   }
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{font-family:'Josefin Sans',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);overscroll-behavior-y:none;touch-action:pan-y;-webkit-font-smoothing:antialiased}
+button,a{touch-action:manipulation;user-select:none;-webkit-user-select:none}
+/* 16px mínimo en inputs evita zoom automático en Android/iOS al enfocar */
+input:not([type="range"]),select,textarea{font-size:max(16px,1em)}
 html,body{height:100%;overflow:hidden;background:var(--bg)}
 body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:15px;color:var(--ink);line-height:1.5}
 button,input,select,textarea,a{font-family:inherit;font-size:inherit}
@@ -56,7 +67,7 @@ button,input,select,textarea,a{font-family:inherit;font-size:inherit}
 .chip{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.3);border-radius:24px;padding:4px 12px 4px 4px;cursor:pointer;border-style:solid}
 .chip-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;background-size:cover;background-position:center;overflow:hidden}
 .chip-name{font-size:13px;font-weight:500;color:#fff}
-.pcontent{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:calc(var(--navH) + var(--safeB) + 20px)}
+.pcontent{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;scroll-behavior:smooth;overscroll-behavior-y:contain;padding-bottom:calc(var(--navH) + var(--safeB) + 20px)}
 #page-agenda{max-width:none;padding:14px}
 .botnav{background:var(--surf);border-top:1.5px solid var(--brd);display:flex;height:calc(var(--navH) + var(--safeB));padding-bottom:var(--safeB);flex-shrink:0;z-index:50}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:none;background:none;color:var(--ink3);padding-top:6px;transition:transform .15s cubic-bezier(.34,1.56,.64,1),color .15s;-webkit-tap-highlight-color:transparent}
@@ -86,8 +97,13 @@ input[type=file]{
 }
 .fld{margin-bottom:12px}
 .fld label{display:block;font-size:10px;font-weight:700;color:var(--ink2);margin-bottom:5px;text-transform:uppercase;letter-spacing:1px}
-.fld input,.fld select{width:100%;padding:12px 14px;border:1.5px solid var(--brd);border-radius:10px;font-size:15px;color:var(--ink);background:#fff;outline:none;-webkit-appearance:none;line-height:1.4}
-.fld input:focus{border-color:var(--acc2)}
+.fld input,.fld select{width:100%;padding:12px 14px;border:1.5px solid var(--brd);border-radius:10px;font-size:15px;color:var(--ink);background:#fff;outline:none;-webkit-appearance:none;line-height:1.4;-webkit-border-radius:10px}
+/* iOS dark mode: evitar fondo gris en inputs */
+@media(prefers-color-scheme:dark){.fld input,.fld select{background:var(--surf2);color:var(--ink)}}
+.fld input:focus,.fld select:focus{border-color:var(--acc2);outline:none}
+/* Android: eliminar outline azul en focus */
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+:focus:not(:focus-visible){outline:none}
 .abtn{width:100%;padding:13px;background:var(--acc);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;margin-top:6px;display:block;font-family:'Josefin Sans',sans-serif;letter-spacing:1.5px;text-transform:uppercase}
 .amsg{font-size:12px;text-align:center;margin-top:8px;padding:8px;border-radius:8px}
 .amsg.err{background:var(--redL);color:var(--red)}
@@ -641,7 +657,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbzQ3xmgr836pPPXOwrcXIRl6_xK5PLyRQMh_0_OIczCpOYdjMWy9JDsDux_No9AJ9kr/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -2671,6 +2687,30 @@ function renderAvisos(){
       }
     }
   }catch(e){}
+})();
+
+// PWA manifest inline — Android "Agregar a pantalla de inicio"
+(function(){
+  var icon = document.querySelector('link[rel="apple-touch-icon"]');
+  var iconHref = icon ? icon.href : '';
+  var manifest = {
+    name: 'Integra Más',
+    short_name: 'Integra Más',
+    description: 'Reserva de consultorios médicos',
+    start_url: './',
+    display: 'standalone',
+    orientation: 'portrait',
+    background_color: '#f5ece3',
+    theme_color: '#c25a00',
+    icons: iconHref ? [
+      {src: iconHref, sizes: '192x192', type: 'image/png', purpose: 'any maskable'},
+      {src: iconHref, sizes: '512x512', type: 'image/png', purpose: 'any maskable'}
+    ] : []
+  };
+  var blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var link = document.getElementById('pwa-manifest');
+  if(link) link.href = url;
 })();
 </script>
 
