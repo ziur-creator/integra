@@ -45,9 +45,11 @@ button,input,select,textarea,a{font-family:inherit;font-size:inherit}
 #page-agenda{max-width:none;padding:14px}
 .page.on{display:block}
 .botnav{background:var(--surf);border-top:1.5px solid var(--brd);display:flex;height:calc(var(--navH) + var(--safeB));padding-bottom:var(--safeB);flex-shrink:0;z-index:50}
-.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:none;background:none;color:var(--ink3);padding-top:6px}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;border:none;background:none;color:var(--ink3);padding-top:6px;transition:transform .15s cubic-bezier(.34,1.56,.64,1),color .15s;-webkit-tap-highlight-color:transparent}
+.ni:active{transform:scale(.82)}
 .ni.on{color:var(--acc)}
-.ni-ico{font-size:20px;line-height:1}
+.ni.on .ni-ico{transform:scale(1.18);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.ni-ico{font-size:20px;line-height:1;display:block;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
 .ni-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.8px}
 /* AUTH */
 #auth{position:fixed;inset:0;background:var(--acc);z-index:200;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;overflow-y:auto}
@@ -655,7 +657,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbwQPNGHPK9NVu3ubCg7sJLMiB-V6Ds5pXjmTLiQOVNd_GuWquzwGxJqdNC2bimyeQZ2/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
