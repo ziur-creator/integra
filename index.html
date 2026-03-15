@@ -54,18 +54,18 @@ button,input,select,textarea,a{font-family:inherit;font-size:inherit}
 .font-display,.logo,.logo span,.alogo-text,.sec-title,.modal-title,.ch h3,.ahora-time,.pname,.sv,.cmth,.cbar-title,.ni-lbl,.fld label,.slbl,.slbl2,.atable th,.cbadge,.badge,.rbadge,.ahora-status{font-family:'Josefin Sans',sans-serif}
 #app{display:none;flex-direction:column;height:100%;height:100dvh}
 #app.show{display:flex}
-/* Nav fijo al fondo — garantiza safe area en modo PWA standalone */
+/* Nav fijo al fondo */
 .botnav{
   position:fixed;bottom:0;left:0;right:0;
   background:var(--surf);
   border-top:1.5px solid var(--brd);
   display:flex;
-  height:calc(var(--navH) + env(safe-area-inset-bottom,0px));
+  height:var(--navH);
   padding-bottom:env(safe-area-inset-bottom,0px);
   flex-shrink:0;
   z-index:50;
 }
-/* Compensar el espacio que ocupa el nav fijo */
+/* El contenido scrolleable no queda tapado por el nav */
 .pcontent{
   flex:1;
   overflow-y:auto;
@@ -270,9 +270,9 @@ input[type=file]{
 .toast.ok{background:var(--acc)}
 .toast.err{background:var(--red)}
 /* PULL TO REFRESH */
-#ptr-indicator{position:fixed;top:0;left:0;right:0;z-index:400;display:flex;align-items:flex-end;justify-content:center;gap:8px;background:var(--acc);color:#fff;font-size:12px;font-weight:700;font-family:'Josefin Sans',sans-serif;letter-spacing:1px;text-transform:uppercase;height:0;overflow:hidden;transition:height .2s ease;padding-bottom:10px;padding-top:env(safe-area-inset-top,0px)}
-#ptr-indicator.pulling{height:calc(54px + env(safe-area-inset-top,0px))}
-#ptr-indicator.refreshing{height:calc(54px + env(safe-area-inset-top,0px))}
+#ptr-indicator{position:fixed;top:0;left:0;right:0;z-index:400;display:flex;align-items:flex-end;justify-content:center;gap:8px;background:var(--acc);color:#fff;font-size:12px;font-weight:700;font-family:'Josefin Sans',sans-serif;letter-spacing:1px;text-transform:uppercase;height:0;overflow:hidden;transition:height .2s ease}
+#ptr-indicator.pulling{height:calc(54px + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px);padding-bottom:10px}
+#ptr-indicator.refreshing{height:calc(54px + env(safe-area-inset-top,0px));padding-top:env(safe-area-inset-top,0px);padding-bottom:10px}
 #ptr-indicator .ptr-spinner{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
 #ptr-indicator.refreshing .ptr-spinner{display:block}
 #ptr-indicator.refreshing .ptr-arrow{display:none}
@@ -676,7 +676,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbzQ3xmgr836pPPXOwrcXIRl6_xK5PLyRQMh_0_OIczCpOYdjMWy9JDsDux_No9AJ9kr/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
