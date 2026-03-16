@@ -676,7 +676,7 @@ input[type=file]{
 <div class="toast" id="toast"></div>
 
 <script>
-var API_URL = 'https://script.google.com/macros/s/AKfycbyL6FnaW_D8jLGoZd1bK8tPv8mfJC0RcmX_8ZJ20f36dph_3KQGg3gDXYwnJpOmviI/exec';
+var API_URL = 'TU_URL_DE_APPS_SCRIPT_AQUI';
 
 var CU=null, RR=[], AU=[];
 var COLS=['#c25a00','#e07830','#c0392b','#8e44ad','#d68910','#2980b9','#27ae60','#b84a00'];
@@ -1133,9 +1133,10 @@ function startSession(user){
   var hta=G('home-tile-admin');if(hta)hta.style.display=user.rol==='admin'?'flex':'none';
   var n=new Date();calY=n.getFullYear();calM=n.getMonth();
   calvWeekStart=getWeekStart(today());
-  loadBlocked();
-  initDR();
-  loadRR(function(){renderCal();updateStepper();showPage('home');updateMRBadge();});
+  loadBlocked(function(){
+    initDR();
+    loadRR(function(){renderCal();updateStepper();showPage('home');updateMRBadge();});
+  });
   if(user.rol==='admin'){
     apiPost({action:'getUsers'},function(err,res){if(!err&&res&&res.ok)AU=res.users||[];});
   }
@@ -2014,16 +2015,19 @@ function removeBlock(date){
 function saveBlocked(){
   try{localStorage.setItem('im_blocked', JSON.stringify(BLOCKED));}catch(e){}
 }
-function loadBlocked(){
+function loadBlocked(cb){
   try{var s=localStorage.getItem('im_blocked');if(s)BLOCKED=JSON.parse(s)||[];}catch(e){}
   if(!isDemo()){
     api({action:'getBlocked'},function(err,res){
       if(!err&&res&&res.ok&&res.blocked){
         BLOCKED=res.blocked;
         try{localStorage.setItem('im_blocked',JSON.stringify(BLOCKED));}catch(e){}
-        renderCal();
       }
+      if(cb) cb();
+      else renderCal();
     });
+  } else {
+    if(cb) cb();
   }
 }
 
